@@ -20,6 +20,7 @@ class CafeReceipt {
   final String invoiceNumber;
   final DateTime date;
   final String? table;
+  final String? customerName;
   final List<CafeReceiptItem> items;
   final int subtotal;
   final int discountPercent;
@@ -36,6 +37,7 @@ class CafeReceipt {
     required this.invoiceNumber,
     required this.date,
     this.table,
+    this.customerName,
     required this.items,
     required this.subtotal,
     this.discountPercent = 0,

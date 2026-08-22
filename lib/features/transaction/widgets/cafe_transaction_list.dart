@@ -88,7 +88,7 @@ class CafeTransactionListState extends State<CafeTransactionList> {
           businessAddress: BusinessInfo.address,
           invoiceNumber: detail.invoiceNumber,
           date: detail.date,
-          table: detail.table != null ? "Meja ${detail.table}" : "Takeaway",
+          table: detail.table != null ? "Meja ${detail.table}" : null,
           items: [
             for (final item in detail.items)
               CafeReceiptItem(

@@ -15,6 +15,7 @@ class CafePaymentResult {
   final int transactionCafeId;
   final String paymentMethodName;
   final int? table;
+  final String? customerName;
   final int tax;
   final int discountPercent;
   final bool printKitchenTicket;
@@ -23,6 +24,7 @@ class CafePaymentResult {
     required this.transactionCafeId,
     required this.paymentMethodName,
     this.table,
+    this.customerName,
     this.tax = 0,
     this.discountPercent = 0,
     this.printKitchenTicket = false,
@@ -53,6 +55,7 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
   final _sessionStorage = SessionStorage();
 
   final _tableController = TextEditingController();
+  final _customerNameController = TextEditingController();
   final _discountController = TextEditingController();
 
   bool _loadingOptions = true;
@@ -74,6 +77,7 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
   @override
   void dispose() {
     _tableController.dispose();
+    _customerNameController.dispose();
     _discountController.dispose();
     super.dispose();
   }
@@ -127,6 +131,7 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
       final createdBy = session?['username']?.toString() ?? "";
       final paidBy = int.tryParse(session?['id']?.toString() ?? "") ?? 0;
       final table = int.tryParse(_tableController.text.trim());
+      final customerName = _customerNameController.text.trim();
 
       final transactionCafeId = await _cafeRepository.submitTransactionCafe(
         paymentId: paymentMethod.id,
@@ -144,6 +149,7 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
           transactionCafeId: transactionCafeId,
           paymentMethodName: paymentMethod.name,
           table: table,
+          customerName: customerName.isNotEmpty ? customerName : null,
           tax: 0,
           discountPercent: _discountPercent,
           printKitchenTicket: _printKitchenTicket,
@@ -317,7 +323,24 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
               ),
             ),
             const SizedBox(width: 16),
-            const Expanded(child: SizedBox.shrink()),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _label("Nama Customer (opsional)"),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _customerNameController,
+                    style: AppText.body,
+                    decoration: _inputDecoration(
+                      hint: "Mis. Budi",
+                      prefixIcon: Icons.person_outline_rounded,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
 

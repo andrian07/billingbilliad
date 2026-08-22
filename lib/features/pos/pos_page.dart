@@ -237,6 +237,7 @@ class _PosPageState extends State<PosPage> {
         try {
           await _receiptPrinter.printKitchenOrder(
             keepCode: receipt.invoiceNumber,
+            customerName: result.customerName,
             items: items,
           );
         } catch (e) {
