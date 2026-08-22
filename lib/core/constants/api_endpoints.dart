@@ -6,6 +6,7 @@ class ApiEndpoints {
   // Auth
   static const String login = "$baseUrl/Auth/login";
   static const String addAbsensi = "$baseUrl/Auth/add_absensi";
+  static const String changePassword = "$baseUrl/Auth/change_password";
 
   // Master user
   static const String userList = "$baseUrl/Master/user_list";

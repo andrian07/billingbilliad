@@ -13,6 +13,7 @@ import '../../features/report/billing_report_page.dart';
 import '../../features/report/cafe_report_page.dart';
 import '../../features/report/stock_report_page.dart';
 import '../../features/role/role_page.dart';
+import '../../features/settings/change_password_page.dart';
 import '../../features/settings/settings_page.dart';
 import '../../features/settings/table_setting_page.dart';
 import '../../features/transaction/transaction_page.dart';
@@ -138,6 +139,11 @@ final appRouter = GoRouter(
       path: "/setting/table",
       pageBuilder: (context, state) =>
           _fadeThroughPage(const TableSettingPage()),
+    ),
+    GoRoute(
+      path: "/setting/ganti-password",
+      pageBuilder: (context, state) =>
+          _fadeThroughPage(const ChangePasswordPage()),
     ),
   ],
 );

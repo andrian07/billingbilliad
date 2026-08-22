@@ -125,6 +125,11 @@ class AppSidebar extends StatelessWidget {
           icon: Icons.settings_input_component_rounded,
           menuKey: "setting_table",
         ),
+        AppMenuItem(
+          title: "Ganti Password",
+          icon: Icons.lock_reset_rounded,
+          menuKey: "ganti_password",
+        ),
       ],
     ),
   ];
@@ -145,7 +150,12 @@ class AppSidebar extends StatelessWidget {
           title: section.title,
           items: [
             for (final item in section.items)
-              if (allowed.contains(item.menuKey)) item,
+              // Ganti Password is a personal action every account needs
+              // regardless of role permissions, not something to gate
+              // behind the menu-access system — always shown, like Keluar.
+              if (item.menuKey == 'ganti_password' ||
+                  allowed.contains(item.menuKey))
+                item,
           ],
         ),
     ].where((section) => section.items.isNotEmpty).toList();
