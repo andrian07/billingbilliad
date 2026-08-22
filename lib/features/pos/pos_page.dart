@@ -58,6 +58,7 @@ class _PosPageState extends State<PosPage> {
   /// that same record instead of creating a duplicate. Cleared whenever the
   /// cart is cleared/checked out.
   int? _activeKeepTransactionId;
+  String? _activeKeepTransactionName;
   Map<int, int> _keepBaseline = {};
 
   @override
@@ -166,6 +167,7 @@ class _PosPageState extends State<PosPage> {
     setState(() {
       _cart.clear();
       _activeKeepTransactionId = null;
+      _activeKeepTransactionName = null;
       _keepBaseline = {};
     });
   }
@@ -193,7 +195,11 @@ class _PosPageState extends State<PosPage> {
 
     final result = await showDialog<CafePaymentResult>(
       context: context,
-      builder: (_) => CafePaymentDialog(items: items, subtotal: subtotal),
+      builder: (_) => CafePaymentDialog(
+        items: items,
+        subtotal: subtotal,
+        initialCustomerName: _activeKeepTransactionName,
+      ),
     );
     if (result == null) return;
     if (!mounted) return;
@@ -201,6 +207,7 @@ class _PosPageState extends State<PosPage> {
     setState(() {
       _cart.clear();
       _activeKeepTransactionId = null;
+      _activeKeepTransactionName = null;
       _keepBaseline = {};
     });
     AppToast.success(
@@ -385,6 +392,7 @@ class _PosPageState extends State<PosPage> {
         _keepBaseline[item.productId] = item.quantity;
       }
       _activeKeepTransactionId = detail.id;
+      _activeKeepTransactionName = detail.name;
     });
 
     if (!mounted) return;

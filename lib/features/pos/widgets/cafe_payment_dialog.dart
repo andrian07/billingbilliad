@@ -38,11 +38,13 @@ class CafePaymentResult {
 class CafePaymentDialog extends StatefulWidget {
   final List<CartItem> items;
   final int subtotal;
+  final String? initialCustomerName;
 
   const CafePaymentDialog({
     super.key,
     required this.items,
     required this.subtotal,
+    this.initialCustomerName,
   });
 
   @override
@@ -71,6 +73,7 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
   @override
   void initState() {
     super.initState();
+    _customerNameController.text = widget.initialCustomerName ?? '';
     _loadOptions();
   }
 
