@@ -139,6 +139,7 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
       final transactionCafeId = await _cafeRepository.submitTransactionCafe(
         paymentId: paymentMethod.id,
         table: table,
+        customerName: customerName.isNotEmpty ? customerName : null,
         tax: 0,
         discountPercent: _discountPercent.toDouble(),
         createdBy: createdBy,

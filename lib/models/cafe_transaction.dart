@@ -6,6 +6,7 @@ class CafeTransaction {
   final String invoiceNumber;
   final DateTime date;
   final String? table;
+  final String? customerName;
   final int paymentId;
   final String? paymentName;
   final int? promoId;
@@ -24,6 +25,7 @@ class CafeTransaction {
     required this.invoiceNumber,
     required this.date,
     this.table,
+    this.customerName,
     required this.paymentId,
     this.paymentName,
     this.promoId,
@@ -58,6 +60,7 @@ class CafeTransaction {
       invoiceNumber: json['inv']?.toString() ?? "",
       date: DateTime.tryParse(json['date']?.toString() ?? "") ?? DateTime.now(),
       table: json['table']?.toString(),
+      customerName: json['customer_name']?.toString(),
       paymentId: asInt(json['payment_id']),
       paymentName: paymentName,
       promoId: asOptionalId(json['promo_id']),
@@ -113,6 +116,7 @@ class CafeTransactionDetail {
   final String invoiceNumber;
   final DateTime date;
   final String? table;
+  final String? customerName;
   final List<CafeTransactionDetailItem> items;
   final int subTotal;
   final int discount;
@@ -128,6 +132,7 @@ class CafeTransactionDetail {
     required this.invoiceNumber,
     required this.date,
     this.table,
+    this.customerName,
     required this.items,
     required this.subTotal,
     required this.discount,
@@ -153,6 +158,7 @@ class CafeTransactionDetail {
       date:
           DateTime.tryParse(json['date']?.toString() ?? "") ?? DateTime.now(),
       table: json['table']?.toString(),
+      customerName: json['customer_name']?.toString(),
       items: rawItems is List
           ? rawItems
                 .whereType<Map<String, dynamic>>()

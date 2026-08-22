@@ -89,6 +89,7 @@ class CafeTransactionListState extends State<CafeTransactionList> {
           invoiceNumber: detail.invoiceNumber,
           date: detail.date,
           table: detail.table != null ? "Meja ${detail.table}" : null,
+          customerName: detail.customerName,
           items: [
             for (final item in detail.items)
               CafeReceiptItem(
