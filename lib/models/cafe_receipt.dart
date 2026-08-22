@@ -22,6 +22,8 @@ class CafeReceipt {
   final String? table;
   final List<CafeReceiptItem> items;
   final int subtotal;
+  final int discountPercent;
+  final int discountAmount;
   final int tax;
   final int total;
   final String paymentMethod;
@@ -36,6 +38,8 @@ class CafeReceipt {
     this.table,
     required this.items,
     required this.subtotal,
+    this.discountPercent = 0,
+    this.discountAmount = 0,
     required this.tax,
     required this.total,
     required this.paymentMethod,

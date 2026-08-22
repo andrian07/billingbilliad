@@ -174,6 +174,13 @@ class ReceiptPrinterService {
 
     ticket.separator(char: '-', linesAfter: 1);
     TicketLayout.row(ticket, "Subtotal", formatCurrency(receipt.subtotal));
+    if (receipt.discountAmount > 0) {
+      TicketLayout.row(
+        ticket,
+        "Diskon (${receipt.discountPercent}%)",
+        "-${formatCurrency(receipt.discountAmount)}",
+      );
+    }
     if (receipt.tax > 0) {
       TicketLayout.row(ticket, "Pajak", formatCurrency(receipt.tax));
     }

@@ -14,6 +14,7 @@ class CafeInvoiceRepository {
     required String cashierName,
   }) {
     final now = DateTime.now();
+    final discountAmount = (subtotal * payment.discountPercent / 100).round();
 
     return Future.value(
       CafeReceipt(
@@ -32,8 +33,10 @@ class CafeInvoiceRepository {
             ),
         ],
         subtotal: subtotal,
+        discountPercent: payment.discountPercent,
+        discountAmount: discountAmount,
         tax: payment.tax,
-        total: subtotal + payment.tax,
+        total: subtotal - discountAmount + payment.tax,
         paymentMethod: payment.paymentMethodName,
         cashierName: cashierName,
       ),

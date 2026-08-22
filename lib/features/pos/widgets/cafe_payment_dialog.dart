@@ -16,6 +16,7 @@ class CafePaymentResult {
   final String paymentMethodName;
   final int? table;
   final int tax;
+  final int discountPercent;
   final bool printKitchenTicket;
 
   const CafePaymentResult({
@@ -23,6 +24,7 @@ class CafePaymentResult {
     required this.paymentMethodName,
     this.table,
     this.tax = 0,
+    this.discountPercent = 0,
     this.printKitchenTicket = false,
   });
 }
@@ -51,6 +53,7 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
   final _sessionStorage = SessionStorage();
 
   final _tableController = TextEditingController();
+  final _discountController = TextEditingController();
 
   bool _loadingOptions = true;
   String? _loadError;
@@ -71,8 +74,18 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
   @override
   void dispose() {
     _tableController.dispose();
+    _discountController.dispose();
     super.dispose();
   }
+
+  int get _discountPercent {
+    final value = int.tryParse(_discountController.text.trim()) ?? 0;
+    return value.clamp(0, 100);
+  }
+
+  int get _discountAmount => (widget.subtotal * _discountPercent / 100).round();
+
+  int get _totalAfterDiscount => widget.subtotal - _discountAmount;
 
   Future<void> _loadOptions() async {
     setState(() {
@@ -119,6 +132,7 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
         paymentId: paymentMethod.id,
         table: table,
         tax: 0,
+        discountPercent: _discountPercent.toDouble(),
         createdBy: createdBy,
         paidBy: paidBy,
         items: widget.items,
@@ -131,6 +145,7 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
           paymentMethodName: paymentMethod.name,
           table: table,
           tax: 0,
+          discountPercent: _discountPercent,
           printKitchenTicket: _printKitchenTicket,
         ),
       );
@@ -270,6 +285,39 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
                 ],
               ),
             ),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _label("Diskon (%)"),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _discountController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(3),
+                    ],
+                    style: AppText.body,
+                    decoration: _inputDecoration(
+                      hint: "0",
+                      prefixIcon: Icons.percent_rounded,
+                    ),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            const Expanded(child: SizedBox.shrink()),
           ],
         ),
 
@@ -414,6 +462,23 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
           const SizedBox(height: 10),
           const Divider(color: AppColors.divider, height: 1),
           const SizedBox(height: 10),
+          _kv(
+            Icons.receipt_long_outlined,
+            "Subtotal",
+            formatCurrency(widget.subtotal),
+          ),
+          if (_discountPercent > 0) ...[
+            const SizedBox(height: 10),
+            _kv(
+              Icons.percent_rounded,
+              "Diskon ($_discountPercent%)",
+              "-${formatCurrency(_discountAmount)}",
+              valueColor: AppColors.danger,
+            ),
+          ],
+          const SizedBox(height: 10),
+          const Divider(color: AppColors.divider, height: 1),
+          const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -423,7 +488,7 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
                 style: AppText.body.copyWith(fontWeight: FontWeight.w700),
               ),
               Text(
-                formatCurrency(widget.subtotal),
+                formatCurrency(_totalAfterDiscount),
                 style: AppText.title.copyWith(
                   color: AppColors.success,
                   fontWeight: FontWeight.w800,

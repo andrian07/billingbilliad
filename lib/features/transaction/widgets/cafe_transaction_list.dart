@@ -99,6 +99,8 @@ class CafeTransactionListState extends State<CafeTransactionList> {
               ),
           ],
           subtotal: detail.subTotal,
+          discountPercent: detail.discount,
+          discountAmount: (detail.subTotal * detail.discount / 100).round(),
           tax: detail.tax,
           total: detail.totalBill,
           paymentMethod: detail.paymentMethod,

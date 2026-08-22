@@ -41,6 +41,7 @@ class CafeRepository {
     required int paymentId,
     int? table,
     required int tax,
+    double discountPercent = 0,
     required String createdBy,
     required int paidBy,
     required List<CartItem> items,
@@ -50,6 +51,7 @@ class CafeRepository {
       "payment_id": paymentId,
       "table": table,
       "tax": tax,
+      "discount_percent": discountPercent,
       "created_by": createdBy,
       "paid_by": paidBy,
       "items": [
