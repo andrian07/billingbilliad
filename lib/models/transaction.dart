@@ -11,6 +11,7 @@ class Transaction {
   final String tableName;
   final String? promoName;
   final String cashierName;
+  final int paymentId;
   final String paymentMethod;
   final int total;
   final TransactionStatus status;
@@ -24,6 +25,7 @@ class Transaction {
     required this.tableName,
     this.promoName,
     required this.cashierName,
+    required this.paymentId,
     required this.paymentMethod,
     required this.total,
     this.status = TransactionStatus.completed,
@@ -46,6 +48,7 @@ class Transaction {
       tableName: "Meja ${tableNumber.toString().padLeft(2, '0')}",
       promoName: promoName,
       cashierName: json['created_by']?.toString() ?? "",
+      paymentId: _asInt(json['payment_id']),
       paymentMethod: paymentMethodName ?? "-",
       total: _asInt(json['total_bill']),
       status: _parseStatus(json['status']),

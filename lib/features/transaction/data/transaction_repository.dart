@@ -177,6 +177,34 @@ class TransactionRepository {
     });
   }
 
+  /// Rejected server-side (and should be kept out of reach client-side too)
+  /// when the transaction's old or new payment method is "Potong Saldo" —
+  /// no logic exists to correct the customer's saldo for a payment-method
+  /// edit made after the sale, only for the original save.
+  Future<void> editBillingPayment({
+    required int transactionId,
+    required int paymentId,
+    required String createdBy,
+  }) async {
+    await _post(ApiEndpoints.editPaymentTransaction, {
+      "transaction_id": transactionId,
+      "payment_id": paymentId,
+      "created_by": createdBy,
+    });
+  }
+
+  Future<void> editCafePayment({
+    required int transactionCafeId,
+    required int paymentId,
+    required String createdBy,
+  }) async {
+    await _post(ApiEndpoints.editPaymentTransactionCafe, {
+      "transaction_cafe_id": transactionCafeId,
+      "payment_id": paymentId,
+      "created_by": createdBy,
+    });
+  }
+
   Future<Map<int, String>> _fetchPromoNames() async {
     try {
       final promos = await _promoRepository.getAllPromos();

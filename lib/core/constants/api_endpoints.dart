@@ -67,6 +67,8 @@ class ApiEndpoints {
   static const String cancelTable = "$baseUrl/Billing/cancel_table";
   static const String transactionList = "$baseUrl/Billing/transaction_list";
   static const String transactionDetail = "$baseUrl/Billing/transaction_detail";
+  static const String editPaymentTransaction =
+      "$baseUrl/Billing/edit_payment_transaction";
   static const String settingTable = "$baseUrl/Billing/setting_table";
   static const String updateSettingTable =
       "$baseUrl/Billing/update_setting_table";
@@ -88,6 +90,8 @@ class ApiEndpoints {
   static const String transactionCafeDetail = "$baseUrl/Cafe/transaction_detail";
   static const String cancelTransactionCafe =
       "$baseUrl/Cafe/cancel_transaction_cafe";
+  static const String editPaymentTransactionCafe =
+      "$baseUrl/Cafe/edit_payment_transaction_cafe";
 
   // Opname (stock opname - owner only, lihat Opname.php di backend)
   static const String opnameProductList = "$baseUrl/Opname/product_list";

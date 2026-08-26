@@ -7,11 +7,13 @@ import '../../../core/theme/app_text.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../models/cafe_receipt.dart';
 import '../../../models/cafe_transaction.dart';
+import '../../../models/payment_method.dart';
 import '../../../models/transaction.dart';
 import '../../../services/receipt_printer_service.dart';
 import '../../../services/session_storage.dart';
 import '../../../shared/widgets/app_toast.dart';
 import '../data/transaction_repository.dart';
+import 'edit_payment_dialog.dart';
 
 class CafeTransactionList extends StatefulWidget {
   const CafeTransactionList({super.key});
@@ -34,6 +36,7 @@ class CafeTransactionListState extends State<CafeTransactionList> {
   String? _error;
   int? _reprintingId;
   int? _cancelingId;
+  int? _editingPaymentId;
 
   @override
   void initState() {
@@ -189,6 +192,42 @@ class CafeTransactionListState extends State<CafeTransactionList> {
       AppToast.error(context, e.message);
     } finally {
       if (mounted) setState(() => _cancelingId = null);
+    }
+  }
+
+  Future<void> _editPayment(CafeTransaction transaction) async {
+    if (_editingPaymentId != null) return;
+
+    final result = await showDialog<PaymentMethod>(
+      context: context,
+      builder: (_) => EditPaymentDialog(
+        invoiceNumber: transaction.invoiceNumber,
+        currentPaymentId: transaction.paymentId,
+        currentPaymentName: transaction.paymentName ?? "-",
+      ),
+    );
+    if (result == null) return;
+
+    setState(() => _editingPaymentId = transaction.id);
+    try {
+      final session = await SessionStorage().getSession();
+      final createdBy = session?['username']?.toString() ?? "";
+      await _repository.editCafePayment(
+        transactionCafeId: transaction.id,
+        paymentId: result.id,
+        createdBy: createdBy,
+      );
+      if (!mounted) return;
+      AppToast.success(
+        context,
+        "Metode pembayaran ${transaction.invoiceNumber} diubah ke ${result.name}",
+      );
+      await _load(_currentPage);
+    } on TransactionRepositoryException catch (e) {
+      if (!mounted) return;
+      AppToast.error(context, e.message);
+    } finally {
+      if (mounted) setState(() => _editingPaymentId = null);
     }
   }
 
@@ -399,6 +438,15 @@ class CafeTransactionListState extends State<CafeTransactionList> {
                     onTap: () => _reprintReceipt(transaction),
                   ),
                   const SizedBox(width: 6),
+                  if (transaction.paymentName != "Potong Saldo") ...[
+                    _ActionButton(
+                      icon: Icons.sync_alt_rounded,
+                      tooltip: "Ubah metode pembayaran",
+                      loading: _editingPaymentId == transaction.id,
+                      onTap: () => _editPayment(transaction),
+                    ),
+                    const SizedBox(width: 6),
+                  ],
                   _ActionButton(
                     icon: Icons.cancel_outlined,
                     tooltip: "Batalkan transaksi",
@@ -454,7 +502,7 @@ class CafeTransactionListState extends State<CafeTransactionList> {
         const SizedBox(width: 12),
         SizedBox(width: 90, child: status),
         const SizedBox(width: 12),
-        SizedBox(width: 76, child: aksi),
+        SizedBox(width: 112, child: aksi),
       ],
     );
   }
