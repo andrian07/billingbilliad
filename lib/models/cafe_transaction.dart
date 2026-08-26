@@ -81,17 +81,44 @@ class CafeTransaction {
   }
 }
 
+class CafeTransactionAddonItem {
+  final String name;
+  final int quantity;
+  final int price;
+
+  const CafeTransactionAddonItem({
+    required this.name,
+    required this.quantity,
+    required this.price,
+  });
+
+  factory CafeTransactionAddonItem.fromJson(Map<String, dynamic> json) {
+    int asInt(dynamic value) {
+      if (value is int) return value;
+      return int.tryParse(value?.toString() ?? "") ?? 0;
+    }
+
+    return CafeTransactionAddonItem(
+      name: json['product_name']?.toString() ?? "",
+      quantity: asInt(json['qty']),
+      price: asInt(json['price']),
+    );
+  }
+}
+
 class CafeTransactionDetailItem {
   final String name;
   final int quantity;
   final int price;
   final String? note;
+  final List<CafeTransactionAddonItem> addons;
 
   const CafeTransactionDetailItem({
     required this.name,
     required this.quantity,
     required this.price,
     this.note,
+    this.addons = const [],
   });
 
   factory CafeTransactionDetailItem.fromJson(Map<String, dynamic> json) {
@@ -100,11 +127,19 @@ class CafeTransactionDetailItem {
       return int.tryParse(value?.toString() ?? "") ?? 0;
     }
 
+    final rawAddons = json['addons'];
+
     return CafeTransactionDetailItem(
       name: json['product_name']?.toString() ?? "",
       quantity: asInt(json['qty']),
       price: asInt(json['price']),
       note: json['note']?.toString(),
+      addons: rawAddons is List
+          ? rawAddons
+              .whereType<Map<String, dynamic>>()
+              .map(CafeTransactionAddonItem.fromJson)
+              .toList()
+          : const [],
     );
   }
 }

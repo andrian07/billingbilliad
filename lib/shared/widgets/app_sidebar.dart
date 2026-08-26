@@ -81,6 +81,11 @@ class AppSidebar extends StatelessWidget {
           menuKey: "pembelian",
         ),
         AppMenuItem(
+          title: "Opname",
+          icon: Icons.fact_check_outlined,
+          menuKey: "opname",
+        ),
+        AppMenuItem(
           title: "Unit",
           icon: Icons.straighten_outlined,
           menuKey: "unit",

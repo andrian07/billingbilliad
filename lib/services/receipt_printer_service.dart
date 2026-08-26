@@ -175,8 +175,15 @@ class ReceiptPrinterService {
       TicketLayout.row(
         ticket,
         "  ${item.quantity} x ${formatCurrency(item.price)}",
-        formatCurrency(item.lineTotal),
+        formatCurrency(item.price * item.quantity),
       );
+      for (final addon in item.addons) {
+        TicketLayout.row(
+          ticket,
+          "  + ${addon.name} x${addon.quantity}",
+          formatCurrency(addon.lineTotal),
+        );
+      }
     }
 
     ticket.separator(char: '-', linesAfter: 1);
@@ -233,6 +240,9 @@ class ReceiptPrinterService {
       final note = item.note?.trim();
       if (note != null && note.isNotEmpty) {
         ticket.text("  ($note)");
+      }
+      for (final addon in item.addons) {
+        ticket.text("  + ${addon.quantity} x ${addon.product.name}");
       }
       ticket.feed(1);
     }

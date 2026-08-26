@@ -36,24 +36,34 @@ class _TutupKasDialogState extends State<TutupKasDialog> {
   bool _printing = false;
   bool _printingCafeItems = false;
 
+  /// Null on the very first load, so it fetches the server's default
+  /// business day exactly as before; set once the summary comes back (or
+  /// the user picks a different date) so the date picker has something to
+  /// show and re-request against.
+  DateTime? _selectedDate;
+
   @override
   void initState() {
     super.initState();
     _load();
   }
 
-  Future<void> _load() async {
+  Future<void> _load({DateTime? date}) async {
     setState(() {
       _loading = true;
       _error = null;
     });
 
     try {
-      final summary = await _repository.getTodaySummary(userId: widget.userId);
+      final summary = await _repository.getTodaySummary(
+        userId: widget.userId,
+        date: date,
+      );
 
       if (!mounted) return;
       setState(() {
         _summary = summary;
+        _selectedDate = summary.businessDate;
         _loading = false;
       });
     } on CashierRepositoryException catch (e) {
@@ -63,6 +73,18 @@ class _TutupKasDialogState extends State<TutupKasDialog> {
         _loading = false;
       });
     }
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? now,
+      firstDate: DateTime(now.year - 2),
+      lastDate: now,
+    );
+    if (picked == null) return;
+    await _load(date: picked);
   }
 
   Future<void> _print() async {
@@ -229,7 +251,7 @@ class _TutupKasDialogState extends State<TutupKasDialog> {
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(
-            onPressed: _load,
+            onPressed: () => _load(date: _selectedDate),
             icon: const Icon(Icons.refresh_rounded, size: 18),
             label: const Text("Coba Lagi"),
             style: OutlinedButton.styleFrom(
@@ -253,9 +275,30 @@ class _TutupKasDialogState extends State<TutupKasDialog> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text("Tanggal", style: AppText.bodySecondary),
-            Text(
-              formatFullDate(summary.businessDate),
-              style: AppText.body.copyWith(fontWeight: FontWeight.w600),
+            InkWell(
+              onTap: _pickDate,
+              borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      formatFullDate(summary.businessDate),
+                      style: AppText.body.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(width: 6),
+                    const Icon(
+                      Icons.calendar_month_rounded,
+                      size: 16,
+                      color: AppColors.primary,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),

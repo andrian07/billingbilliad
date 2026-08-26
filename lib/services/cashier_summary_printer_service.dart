@@ -90,6 +90,8 @@ class CashierSummaryPrinterService {
   ) async {
     final ticket = await Ticket.create(PaperSize.mm80);
 
+    final now = DateTime.now();
+
     ticket.text(
       "TUTUP KAS",
       align: PrintAlign.center,
@@ -99,6 +101,11 @@ class CashierSummaryPrinterService {
     ticket.separator(char: '=', linesAfter: 1);
 
     TicketLayout.row(ticket, "Kasir", cashierName);
+    TicketLayout.row(
+      ticket,
+      "Dicetak",
+      "${formatFullDate(now)} ${formatClock(now)}",
+    );
 
     TicketLayout.sectionTitle(ticket, "Billing");
     TicketLayout.row(ticket, "Jumlah Nota", "${summary.billing.invoiceCount}");
@@ -135,6 +142,8 @@ class CashierSummaryPrinterService {
   ) async {
     final ticket = await Ticket.create(PaperSize.mm80);
 
+    final now = DateTime.now();
+
     ticket.text(
       "ITEM CAFE TERJUAL",
       align: PrintAlign.center,
@@ -144,6 +153,11 @@ class CashierSummaryPrinterService {
     ticket.separator(char: '=', linesAfter: 1);
 
     TicketLayout.row(ticket, "Kasir", cashierName);
+    TicketLayout.row(
+      ticket,
+      "Dicetak",
+      "${formatFullDate(now)} ${formatClock(now)}",
+    );
     ticket.separator(char: '-', linesAfter: 1);
 
     if (summary.cafeItems.isEmpty) {

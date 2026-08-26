@@ -62,6 +62,11 @@ class CafeRepository {
             "product_id": item.product.id,
             "qty": item.quantity,
             if (item.note != null) "note": item.note,
+            if (item.addons.isNotEmpty)
+              "addons": [
+                for (final addon in item.addons)
+                  {"product_id": addon.product.id, "qty": addon.quantity},
+              ],
           },
       ],
     });
@@ -96,6 +101,11 @@ class CafeRepository {
             "product_id": item.product.id,
             "qty": item.quantity,
             if (item.note != null) "note": item.note,
+            if (item.addons.isNotEmpty)
+              "addons": [
+                for (final addon in item.addons)
+                  {"product_id": addon.product.id, "qty": addon.quantity},
+              ],
           },
       ],
     };

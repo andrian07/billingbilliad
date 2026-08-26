@@ -1,17 +1,34 @@
+class CafeReceiptAddon {
+  final String name;
+  final int quantity;
+  final int price;
+
+  const CafeReceiptAddon({
+    required this.name,
+    required this.quantity,
+    required this.price,
+  });
+
+  int get lineTotal => price * quantity;
+}
+
 class CafeReceiptItem {
   final String name;
   final int quantity;
   final int price;
   final String? note;
+  final List<CafeReceiptAddon> addons;
 
   const CafeReceiptItem({
     required this.name,
     required this.quantity,
     required this.price,
     this.note,
+    this.addons = const [],
   });
 
-  int get lineTotal => price * quantity;
+  int get lineTotal =>
+      price * quantity + addons.fold(0, (sum, a) => sum + a.lineTotal);
 }
 
 class CafeReceipt {

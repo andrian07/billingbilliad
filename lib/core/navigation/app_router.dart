@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/login_page.dart';
 import '../../features/billing/billing_page.dart';
 import '../../features/category/category_page.dart';
+import '../../features/opname/opname_add_page.dart';
+import '../../features/opname/opname_page.dart';
 import '../../features/pos/pos_page.dart';
 import '../../features/product/product_page.dart';
 import '../../features/promo/promo_page.dart';
@@ -111,6 +113,15 @@ final appRouter = GoRouter(
       path: "/pembelian/tambah",
       pageBuilder: (context, state) =>
           _fadeThroughPage(const PurchaseAddPage()),
+    ),
+    GoRoute(
+      path: "/opname",
+      pageBuilder: (context, state) => _fadeThroughPage(const OpnamePage()),
+    ),
+    GoRoute(
+      path: "/opname/tambah",
+      pageBuilder: (context, state) =>
+          _fadeThroughPage(const OpnameAddPage()),
     ),
     GoRoute(
       path: "/laporan/billing",

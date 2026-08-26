@@ -97,6 +97,14 @@ class CafeTransactionListState extends State<CafeTransactionList> {
                 quantity: item.quantity,
                 price: item.price,
                 note: item.note,
+                addons: [
+                  for (final addon in item.addons)
+                    CafeReceiptAddon(
+                      name: addon.name,
+                      quantity: addon.quantity,
+                      price: addon.price,
+                    ),
+                ],
               ),
           ],
           subtotal: detail.subTotal,

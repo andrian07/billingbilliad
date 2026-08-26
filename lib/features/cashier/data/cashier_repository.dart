@@ -19,9 +19,16 @@ class CashierRepositoryException implements Exception {
 class CashierRepository {
   final Dio _dio = Dio();
 
-  Future<CashierClosingSummary> getTodaySummary({required int userId}) async {
+  /// [date] is optional — omitted means the current cashier business day
+  /// (10:00 today through 09:59:59 tomorrow); passing it looks up any other
+  /// past business day instead (see Report/get_transaction_today_by_cashier).
+  Future<CashierClosingSummary> getTodaySummary({
+    required int userId,
+    DateTime? date,
+  }) async {
     final data = await _post(ApiEndpoints.transactionTodayByCashier, {
       "user_id": userId,
+      if (date != null) "date": _formatDate(date),
     });
 
     final result = data['result'];
@@ -32,6 +39,11 @@ class CashierRepository {
     }
 
     return CashierClosingSummary.fromJson(result);
+  }
+
+  String _formatDate(DateTime date) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return "${date.year}-${two(date.month)}-${two(date.day)}";
   }
 
   Future<Map<String, dynamic>> _post(

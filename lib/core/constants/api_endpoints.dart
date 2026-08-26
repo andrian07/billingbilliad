@@ -89,6 +89,11 @@ class ApiEndpoints {
   static const String cancelTransactionCafe =
       "$baseUrl/Cafe/cancel_transaction_cafe";
 
+  // Opname (stock opname - owner only, lihat Opname.php di backend)
+  static const String opnameProductList = "$baseUrl/Opname/product_list";
+  static const String opnameList = "$baseUrl/Opname/opname_list";
+  static const String opnameAdd = "$baseUrl/Opname/opname_add";
+
   // Setting
   static const String categoryMejaList = "$baseUrl/Setting/category_meja";
   static const String addCategoryMeja = "$baseUrl/Setting/add_category_meja";

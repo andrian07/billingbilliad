@@ -21,6 +21,7 @@ const _routesByKey = {
   'kategori': '/kategori',
   'setting_table': '/setting/table',
   'ganti_password': '/setting/ganti-password',
+  'opname': '/opname',
 };
 
 Future<void> navigateToMenu(BuildContext context, String key) async {

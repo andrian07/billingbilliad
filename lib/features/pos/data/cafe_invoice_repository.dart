@@ -31,6 +31,14 @@ class CafeInvoiceRepository {
               quantity: item.quantity,
               price: item.product.price,
               note: item.note,
+              addons: [
+                for (final addon in item.addons)
+                  CafeReceiptAddon(
+                    name: addon.product.name,
+                    quantity: addon.quantity,
+                    price: addon.product.price,
+                  ),
+              ],
             ),
         ],
         subtotal: subtotal,
