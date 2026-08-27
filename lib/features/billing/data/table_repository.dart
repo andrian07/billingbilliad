@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import '../../../core/constants/api_endpoints.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../models/pool_table.dart';
+import '../../../models/promo.dart';
 import '../../promo/data/promo_repository.dart';
 
 class TableRepositoryException implements Exception {
@@ -51,16 +52,14 @@ class TableRepository {
           .where((json) => json['is_active']?.toString() == "1")
           .toList();
 
-      final needsPromoNames = rows.any((json) {
+      final needsPromos = rows.any((json) {
         final promoId = int.tryParse(json['table_promo_id']?.toString() ?? "");
         return promoId != null && promoId != 0;
       });
 
-      final promoNames = needsPromoNames
-          ? await _fetchPromoNames()
-          : const <int, String>{};
+      final promos = needsPromos ? await _fetchPromos() : const <int, Promo>{};
 
-      return rows.map((json) => _tableFromJson(json, promoNames)).toList();
+      return rows.map((json) => _tableFromJson(json, promos)).toList();
     } on TableRepositoryException {
       rethrow;
     } on DioException catch (_) {
@@ -70,10 +69,10 @@ class TableRepository {
     }
   }
 
-  Future<Map<int, String>> _fetchPromoNames() async {
+  Future<Map<int, Promo>> _fetchPromos() async {
     try {
       final result = await _promoRepository.getPromos(page: 1, perPage: 1000);
-      return {for (final p in result.promos) p.id: p.name};
+      return {for (final p in result.promos) p.id: p};
     } catch (_) {
       return const {};
     }
@@ -81,12 +80,13 @@ class TableRepository {
 
   PoolTable _tableFromJson(
     Map<String, dynamic> json,
-    Map<int, String> promoNames,
+    Map<int, Promo> promos,
   ) {
     final isRunning = json['table_active']?.toString() == "1";
     final number = json['table_number']?.toString() ?? "";
     final mode = json['table_mode']?.toString();
     final promoId = int.tryParse(json['table_promo_id']?.toString() ?? "");
+    final promo = (promoId != null && promoId != 0) ? promos[promoId] : null;
     final startAt = _parseDateTime(json['table_start_time']?.toString());
     final endAt = _parseDateTime(json['table_end_time']?.toString());
 
@@ -103,9 +103,8 @@ class TableRepository {
       endAt: endAt,
       plannedDuration: _parseDuration(json['table_duration']?.toString()),
       promoId: (promoId != null && promoId != 0) ? promoId : null,
-      promoName: (promoId != null && promoId != 0)
-          ? promoNames[promoId]
-          : null,
+      promoName: promo?.name,
+      promoType: promo?.type,
       currentBill: int.tryParse(json['table_bill']?.toString() ?? ""),
     );
   }

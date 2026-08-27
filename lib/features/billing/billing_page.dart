@@ -48,13 +48,22 @@ class _BillingPageState extends State<BillingPage> {
   final _cashierRepository = CashierRepository();
 
   CashierClosingSummary? _cashierSummary;
+  bool _isOwner = false;
 
   @override
   void initState() {
     super.initState();
     _loadTables();
     _loadCashierSummary();
+    _loadRole();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+  }
+
+  // "Rincian Transaksi Billing/Cafe" (ringkasan omzet hari ini) hanya untuk owner
+  Future<void> _loadRole() async {
+    final isOwner = await _sessionStorage.isSuperadmin();
+    if (!mounted) return;
+    setState(() => _isOwner = isOwner);
   }
 
   /// Powers the "Rincian Transaksi Billing/Cafe" stat cards — today's
@@ -331,6 +340,16 @@ class _BillingPageState extends State<BillingPage> {
     }
   }
 
+  static const _cancelGracePeriod = Duration(minutes: 15);
+
+  // batal meja hanya boleh dalam 15 menit pertama sejak sesi dimulai - sama dengan guard di
+  // Billing.php::cancel_table(). Dicek juga di sini supaya tombolnya sudah abu-abu/nonaktif
+  // duluan, bukan cuma menunggu backend menolak.
+  bool _canCancel(PoolTable table) {
+    if (table.startAt == null) return true;
+    return DateTime.now().difference(table.startAt!) <= _cancelGracePeriod;
+  }
+
   void _cancelTransaction(PoolTable table) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -409,9 +428,10 @@ class _BillingPageState extends State<BillingPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildStatsRow(),
-
-          const SizedBox(height: 16),
+          if (_isOwner) ...[
+            _buildStatsRow(),
+            const SizedBox(height: 16),
+          ],
 
           _buildStatusHeader(),
 
@@ -595,13 +615,13 @@ class _BillingPageState extends State<BillingPage> {
               : _selectTable(table.id),
           onPayment: () => _openPaymentDialog(table),
           onMoveTable: () => _openMoveTableDialog(table),
-          onAddDuration: table.sessionType == SessionType.timer
+          onAddDuration: (table.sessionType == SessionType.timer && !table.hasFixPromo)
               ? () => _openAddDurationDialog(table)
               : null,
           onRoundUpDuration: table.sessionType == SessionType.reguler
               ? () => _openRoundUpDurationDialog(table)
               : null,
-          onCancel: () => _cancelTransaction(table),
+          onCancel: _canCancel(table) ? () => _cancelTransaction(table) : null,
         );
       },
     );

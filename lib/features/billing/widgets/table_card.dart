@@ -238,7 +238,9 @@ class TableCard extends StatelessWidget {
                 else
                   _actionSlot(
                     icon: Icons.more_time_rounded,
-                    tooltip: "Tambah Durasi",
+                    tooltip: table.hasFixPromo
+                        ? "Tidak bisa tambah durasi (promo paket)"
+                        : "Tambah Durasi",
                     color: AppColors.primary,
                     onTap: table.sessionType == SessionType.timer
                         ? onAddDuration
@@ -246,7 +248,9 @@ class TableCard extends StatelessWidget {
                   ),
                 _actionSlot(
                   icon: Icons.cancel_outlined,
-                  tooltip: "Batalkan",
+                  tooltip: onCancel != null
+                      ? "Batalkan"
+                      : "Tidak bisa dibatalkan (lebih dari 15 menit)",
                   color: AppColors.danger,
                   onTap: onCancel,
                 ),
