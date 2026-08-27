@@ -29,7 +29,9 @@ Color tableStatusColor(PoolTable table) {
     case TableStatus.playing:
       return AppColors.success;
     case TableStatus.unpaid:
-      return AppColors.warning;
+      // Timer sudah habis (00:00:00) - merah, bukan warning/kuning, supaya lebih
+      // menonjol dan segera terlihat perlu ditindaklanjuti (checkout).
+      return AppColors.danger;
     case TableStatus.ready:
       return AppColors.textHint;
   }
@@ -185,6 +187,36 @@ class TableCard extends StatelessWidget {
             ],
           ),
 
+          if (table.promoName != null) ...[
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(
+                  Icons.local_offer_outlined,
+                  size: 11,
+                  color: table.hasFixPromo
+                      ? AppColors.info
+                      : AppColors.purple,
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    table.promoName!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.caption.copyWith(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: table.hasFixPromo
+                          ? AppColors.info
+                          : AppColors.purple,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+
           const SizedBox(height: 8),
 
           if (isReady || isUnpaid)
@@ -250,7 +282,7 @@ class TableCard extends StatelessWidget {
                   icon: Icons.cancel_outlined,
                   tooltip: onCancel != null
                       ? "Batalkan"
-                      : "Tidak bisa dibatalkan (lebih dari 15 menit)",
+                      : "Tidak bisa dibatalkan (lebih dari 6 menit)",
                   color: AppColors.danger,
                   onTap: onCancel,
                 ),

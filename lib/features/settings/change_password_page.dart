@@ -99,18 +99,18 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       showSearch: false,
       activeMenuKey: "ganti_password",
       onMenuSelect: (key) => navigateToMenu(context, key),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(width: 220, child: _buildSubMenu()),
-            const SizedBox(width: 16),
-            Expanded(
-              child: AppCard(
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 460),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: 220, child: _buildSubMenu()),
+          const SizedBox(width: 16),
+          Expanded(
+            child: AppCard(
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 460),
+                  child: SingleChildScrollView(
                     child: _activeTab == _SettingTab.password
                         ? _buildForm()
                         : const PinSettingForm(),
@@ -118,8 +118,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

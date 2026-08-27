@@ -165,15 +165,24 @@ class _StartSessionDialogState extends State<StartSessionDialog> {
     if (isTimer && promo != null && promo.hasTimeWindow) {
       final now = DateTime.now();
       final startHod = now.hour + now.minute / 60;
-      final endHod = startHod + duration.inMinutes / 60;
-      if (startHod < promo.validTimeStart!) {
+      final elapsedHours = duration.inMinutes / 60;
+      // valid_time_start bisa lebih besar dari valid_time_end untuk jendela yang melewati
+      // tengah malam (mis. 22 s/d 4) - digeser relatif ke validTimeStart lalu dibungkus modulo
+      // 24 jam supaya jendela normal & lintas-tengah-malam bisa dicek dengan rumus yang sama.
+      // Sama persis dengan Billing_model::validate_promo_schedule() di backend.
+      final windowLength = (promo.validTimeEnd! - promo.validTimeStart! + 24) % 24;
+      final shiftedStart = (startHod - promo.validTimeStart! + 24) % 24;
+      final shiftedEnd = shiftedStart + elapsedHours;
+
+      if (shiftedStart > windowLength) {
         setState(
           () => _durationError =
-              "Promo ini baru berlaku mulai jam ${promo.validTimeStart}:00",
+              "Promo ini hanya berlaku antara jam ${promo.validTimeStart}:00 - "
+              "${promo.validTimeEnd}:00",
         );
         return;
       }
-      if (endHod > promo.validTimeEnd!) {
+      if (shiftedEnd > windowLength) {
         setState(
           () => _durationError =
               "Durasi ini membuat sesi selesai lewat dari jam "

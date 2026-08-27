@@ -17,6 +17,7 @@ const _routesByKey = {
   'laporan_billing': '/laporan/billing',
   'laporan_cafe': '/laporan/cafe',
   'laporan_stok': '/laporan/stok',
+  'laporan_pembelian': '/laporan/pembelian',
   'unit': '/unit',
   'kategori': '/kategori',
   'setting_table': '/setting/table',

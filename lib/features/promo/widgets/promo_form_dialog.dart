@@ -75,8 +75,11 @@ class _PromoFormDialogState extends State<PromoFormDialog> {
       AppToast.error(context, "Pilih jam mulai dan jam selesai berlaku promo");
       return;
     }
-    if (_useTimeWindow && _timeStart! >= _timeEnd!) {
-      AppToast.error(context, "Jam mulai harus lebih kecil dari jam selesai");
+    // Jam mulai boleh lebih besar dari jam selesai - itu artinya jendela melewati tengah
+    // malam (mis. 22 s/d 4 = berlaku jam 22:00 malam - 04:00 keesokan paginya). Hanya sama
+    // persis (durasi nol) yang ditolak.
+    if (_useTimeWindow && _timeStart == _timeEnd) {
+      AppToast.error(context, "Jam mulai tidak boleh sama dengan jam selesai");
       return;
     }
 

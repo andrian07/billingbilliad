@@ -196,8 +196,20 @@ class _PaymentDialogState extends State<PaymentDialog> {
       final startHod = startAt != null
           ? startAt.hour + startAt.minute / 60
           : now.hour + now.minute / 60;
-      final endHod = now.hour + now.minute / 60;
-      if (startHod < promo.validTimeStart! || endHod > promo.validTimeEnd!) {
+      // endHod dihitung sebagai startHod + waktu main yang sudah berjalan (bukan hour-of-day dari
+      // "now" secara terpisah) - supaya sesi yang melewati tengah malam tidak "membungkus" ke jam
+      // kecil dan lolos dari pengecekan batas atas jendela promo (sama seperti bug yang diperbaiki
+      // di Billing_model::validate_promo_schedule() pada backend).
+      final endHod = startAt != null
+          ? startHod + now.difference(startAt).inSeconds / 3600
+          : now.hour + now.minute / 60;
+      // valid_time_start bisa lebih besar dari valid_time_end untuk jendela yang melewati tengah
+      // malam (mis. 22 s/d 4) - digeser relatif ke validTimeStart lalu dibungkus modulo 24 jam,
+      // sama persis dengan Billing_model::validate_promo_schedule() di backend.
+      final windowLength = (promo.validTimeEnd! - promo.validTimeStart! + 24) % 24;
+      final shiftedStart = (startHod - promo.validTimeStart! + 24) % 24;
+      final shiftedEnd = shiftedStart + (endHod - startHod);
+      if (shiftedStart > windowLength || shiftedEnd > windowLength) {
         AppToast.error(
           context,
           "Promo \"${promo.name}\" hanya berlaku antara jam "

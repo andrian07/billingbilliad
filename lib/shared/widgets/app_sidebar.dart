@@ -115,6 +115,11 @@ class AppSidebar extends StatelessWidget {
           icon: Icons.bar_chart_rounded,
           menuKey: "laporan_stok",
         ),
+        AppMenuItem(
+          title: "Laporan Pembelian",
+          icon: Icons.shopping_cart_outlined,
+          menuKey: "laporan_pembelian",
+        ),
       ],
     ),
     SidebarSection(

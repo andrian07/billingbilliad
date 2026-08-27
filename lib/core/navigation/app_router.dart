@@ -13,6 +13,7 @@ import '../../features/purchase/purchase_add_page.dart';
 import '../../features/purchase/purchase_page.dart';
 import '../../features/report/billing_report_page.dart';
 import '../../features/report/cafe_report_page.dart';
+import '../../features/report/purchase_report_page.dart';
 import '../../features/report/stock_report_page.dart';
 import '../../features/role/role_page.dart';
 import '../../features/settings/change_password_page.dart';
@@ -137,6 +138,11 @@ final appRouter = GoRouter(
       path: "/laporan/stok",
       pageBuilder: (context, state) =>
           _fadeThroughPage(const StockReportPage()),
+    ),
+    GoRoute(
+      path: "/laporan/pembelian",
+      pageBuilder: (context, state) =>
+          _fadeThroughPage(const PurchaseReportPage()),
     ),
     GoRoute(
       path: "/unit",

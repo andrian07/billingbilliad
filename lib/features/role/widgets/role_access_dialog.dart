@@ -38,7 +38,7 @@ const _sidebarMenuLabels = <String, String>{
   'pembelian': 'Pembelian',
   'unit': 'Unit',
   'kategori': 'Kategori',
-  'Laporan': 'Laporan (Billing, Cafe, Stok)',
+  'Laporan': 'Laporan (Billing, Cafe, Stok, Pembelian)',
   'harga_meja': 'Harga Meja',
   'setting_table': 'Table',
 };

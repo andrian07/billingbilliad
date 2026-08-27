@@ -117,6 +117,8 @@ class ApiEndpoints {
   static const String billingReport = "$baseUrl/Report/billing_report";
   static const String cafeReport = "$baseUrl/Report/cafe_report";
   static const String stockReport = "$baseUrl/Report/stock";
+  static const String purchaseReport = "$baseUrl/Report/purchase_report";
+  static const String purchaseSuppliers = "$baseUrl/Report/purchase_suppliers";
 
   // Access (roles & menu permissions)
   static const String roleListNoPaging =

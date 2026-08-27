@@ -12,6 +12,7 @@ const Map<String, List<String>> menuCodeAliases = {
     'laporan_billing',
     'laporan_cafe',
     'laporan_stok',
+    'laporan_pembelian',
   ],
 };
 
