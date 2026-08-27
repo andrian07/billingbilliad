@@ -171,6 +171,43 @@ class _PaymentDialogState extends State<PaymentDialog> {
       }
     }
 
+    if (promo != null && promo.hasDayRestriction) {
+      final today = DateTime.now().weekday; // 1=Senin..7=Minggu
+      if (!promo.validDays!.contains(today)) {
+        final days = promo.validDays!.map((d) => weekdayLabels[d]).join(", ");
+        AppToast.error(context, "Promo \"${promo.name}\" hanya berlaku hari $days.");
+        setState(() {});
+        return;
+      }
+    }
+
+    if (promo != null && promo.hasTimeWindow) {
+      if (widget.table.sessionType != SessionType.timer) {
+        AppToast.error(
+          context,
+          "Promo \"${promo.name}\" hanya berlaku untuk mode Timer.",
+        );
+        setState(() {});
+        return;
+      }
+
+      final startAt = widget.table.startAt;
+      final now = DateTime.now();
+      final startHod = startAt != null
+          ? startAt.hour + startAt.minute / 60
+          : now.hour + now.minute / 60;
+      final endHod = now.hour + now.minute / 60;
+      if (startHod < promo.validTimeStart! || endHod > promo.validTimeEnd!) {
+        AppToast.error(
+          context,
+          "Promo \"${promo.name}\" hanya berlaku antara jam "
+          "${promo.validTimeStart}:00 - ${promo.validTimeEnd}:00.",
+        );
+        setState(() {});
+        return;
+      }
+    }
+
     setState(() {
       _selectedPromo = promo;
 

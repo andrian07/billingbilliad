@@ -7,14 +7,12 @@ import '../../core/navigation/app_navigation.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text.dart';
 import '../../core/utils/formatters.dart';
-import '../../models/cashier_summary.dart';
 import '../../models/pool_table.dart';
 import '../../services/receipt_printer_service.dart';
 import '../../services/session_storage.dart';
 import '../../shared/widgets/app_layout.dart';
 import '../../shared/widgets/app_toast.dart';
 import '../../shared/widgets/pin_guard.dart';
-import '../cashier/data/cashier_repository.dart';
 import 'data/billing_repository.dart';
 import 'data/invoice_repository.dart';
 import 'data/table_repository.dart';
@@ -22,7 +20,6 @@ import 'widgets/add_duration_dialog.dart';
 import 'widgets/move_table_dialog.dart';
 import 'widgets/payment_dialog.dart';
 import 'widgets/round_up_duration_dialog.dart';
-import 'widgets/stat_card.dart';
 import 'widgets/start_session_dialog.dart';
 import 'widgets/table_card.dart';
 
@@ -45,42 +42,12 @@ class _BillingPageState extends State<BillingPage> {
   final _invoiceRepository = InvoiceRepository();
   final _receiptPrinter = ReceiptPrinterService();
   final _sessionStorage = SessionStorage();
-  final _cashierRepository = CashierRepository();
-
-  CashierClosingSummary? _cashierSummary;
-  bool _isOwner = false;
 
   @override
   void initState() {
     super.initState();
     _loadTables();
-    _loadCashierSummary();
-    _loadRole();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
-  }
-
-  // "Rincian Transaksi Billing/Cafe" (ringkasan omzet hari ini) hanya untuk owner
-  Future<void> _loadRole() async {
-    final isOwner = await _sessionStorage.isSuperadmin();
-    if (!mounted) return;
-    setState(() => _isOwner = isOwner);
-  }
-
-  /// Powers the "Rincian Transaksi Billing/Cafe" stat cards — today's
-  /// per-cashier totals from Report/get_transaction_today_by_cashier.
-  Future<void> _loadCashierSummary() async {
-    final session = await _sessionStorage.getSession();
-    final userId = int.tryParse(session?['id']?.toString() ?? "") ?? 0;
-    if (userId == 0) return;
-
-    try {
-      final summary = await _cashierRepository.getTodaySummary(userId: userId);
-
-      if (!mounted) return;
-      setState(() => _cashierSummary = summary);
-    } on CashierRepositoryException {
-      // Silent — stat cards just keep showing the last known totals.
-    }
   }
 
   @override
@@ -91,7 +58,6 @@ class _BillingPageState extends State<BillingPage> {
 
   void _refreshAll() {
     _loadTables();
-    _loadCashierSummary();
   }
 
   Future<void> _loadTables() async {
@@ -117,9 +83,34 @@ class _BillingPageState extends State<BillingPage> {
     }
   }
 
-  List<PoolTable> get _filteredTables => _filter == null
-      ? _tables
-      : _tables.where((t) => t.status == _filter).toList();
+  // Meja Timer yang sedang berjalan diurutkan lebih dulu berdasarkan sisa
+  // waktu tersedikit (paling dekat habis) - supaya kasir langsung lihat meja
+  // mana yang perlu segera ditindaklanjuti (tambah durasi/checkout). Meja
+  // lain (belum main, atau mode Reguler yang tidak ada batas waktu) tetap
+  // di urutan aslinya, ditaruh setelah semua meja Timer yang sedang berjalan.
+  Duration? _timerRemaining(PoolTable table) {
+    if (table.status != TableStatus.playing) return null;
+    if (table.sessionType != SessionType.timer) return null;
+    if (table.endAt == null) return null;
+    return table.endAt!.difference(DateTime.now());
+  }
+
+  List<PoolTable> get _filteredTables {
+    final base = _filter == null
+        ? _tables
+        : _tables.where((t) => t.status == _filter).toList();
+
+    final sorted = [...base];
+    sorted.sort((a, b) {
+      final aRemaining = _timerRemaining(a);
+      final bRemaining = _timerRemaining(b);
+      if (aRemaining == null && bRemaining == null) return 0;
+      if (aRemaining == null) return 1;
+      if (bRemaining == null) return -1;
+      return aRemaining.compareTo(bRemaining);
+    });
+    return sorted;
+  }
 
   void _selectTable(String id) {
     setState(() => _selectedTableId = id);
@@ -239,7 +230,6 @@ class _BillingPageState extends State<BillingPage> {
       context,
       "Pembayaran ${table.name} sebesar ${formatCurrency(result.total)} berhasil via ${result.paymentMethod}",
     );
-    _loadCashierSummary();
 
     try {
       final session = await _sessionStorage.getSession();
@@ -428,11 +418,6 @@ class _BillingPageState extends State<BillingPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (_isOwner) ...[
-            _buildStatsRow(),
-            const SizedBox(height: 16),
-          ],
-
           _buildStatusHeader(),
 
           const SizedBox(height: 16),
@@ -489,35 +474,6 @@ class _BillingPageState extends State<BillingPage> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildStatsRow() {
-    final billing = _cashierSummary?.billing ?? CashierTransactionSummary.empty;
-    final cafe = _cashierSummary?.cafe ?? CashierTransactionSummary.empty;
-
-    return Row(
-      children: [
-        Expanded(
-          child: StatCard(
-            icon: Icons.table_bar_rounded,
-            color: AppColors.primary,
-            label: "Rincian Transaksi Billing",
-            value: formatCurrency(billing.totalTransaction),
-            subtitle: "${billing.invoiceCount} nota hari ini",
-          ),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: StatCard(
-            icon: Icons.local_cafe_rounded,
-            color: AppColors.success,
-            label: "Rincian Transaksi Cafe",
-            value: formatCurrency(cafe.totalTransaction),
-            subtitle: "${cafe.invoiceCount} nota hari ini",
-          ),
-        ),
-      ],
     );
   }
 
