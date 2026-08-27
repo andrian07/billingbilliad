@@ -83,11 +83,15 @@ class _BillingPageState extends State<BillingPage> {
     }
   }
 
-  // Meja Timer yang sedang berjalan diurutkan lebih dulu berdasarkan sisa
-  // waktu tersedikit (paling dekat habis) - supaya kasir langsung lihat meja
-  // mana yang perlu segera ditindaklanjuti (tambah durasi/checkout). Meja
-  // lain (belum main, atau mode Reguler yang tidak ada batas waktu) tetap
-  // di urutan aslinya, ditaruh setelah semua meja Timer yang sedang berjalan.
+  // Kalau _sortByTimer aktif (lewat tombol di header, lihat _buildStatusHeader),
+  // meja Timer yang sedang berjalan diurutkan berdasarkan sisa waktu tersedikit
+  // (paling dekat habis) - supaya kasir bisa langsung lihat meja mana yang perlu
+  // segera ditindaklanjuti (tambah durasi/checkout). Meja lain (belum main, atau
+  // mode Reguler yang tidak ada batas waktu) tetap di urutan aslinya, ditaruh
+  // setelah semua meja Timer yang sedang berjalan. Kalau tidak aktif, urutan asli
+  // (dari API) dipakai apa adanya.
+  bool _sortByTimer = false;
+
   Duration? _timerRemaining(PoolTable table) {
     if (table.status != TableStatus.playing) return null;
     if (table.sessionType != SessionType.timer) return null;
@@ -99,6 +103,8 @@ class _BillingPageState extends State<BillingPage> {
     final base = _filter == null
         ? _tables
         : _tables.where((t) => t.status == _filter).toList();
+
+    if (!_sortByTimer) return base;
 
     final sorted = [...base];
     sorted.sort((a, b) {
@@ -494,6 +500,8 @@ class _BillingPageState extends State<BillingPage> {
                 const SizedBox(width: 8),
                 _filterChip("Ready", TableStatus.ready),
                 const SizedBox(width: 12),
+                _sortByTimerButton(),
+                const SizedBox(width: 12),
                 Container(
                   width: 40,
                   height: 40,
@@ -514,6 +522,50 @@ class _BillingPageState extends State<BillingPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _sortByTimerButton() {
+    final active = _sortByTimer;
+
+    return Tooltip(
+      message: active
+          ? "Urutan: Timer paling dekat habis dulu (klik untuk kembali ke urutan asli)"
+          : "Urutkan berdasarkan Timer paling dekat habis",
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: () => setState(() => _sortByTimer = !_sortByTimer),
+        child: Container(
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: active ? AppColors.primary : AppColors.card,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: active ? AppColors.primary : AppColors.border,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.timer_outlined,
+                size: 16,
+                color: active ? Colors.white : AppColors.textSecondary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                "Urutkan Timer",
+                style: AppText.bodySecondary.copyWith(
+                  color: active ? Colors.white : AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
