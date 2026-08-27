@@ -98,6 +98,12 @@ class ApiEndpoints {
   static const String opnameList = "$baseUrl/Opname/opname_list";
   static const String opnameAdd = "$baseUrl/Opname/opname_add";
 
+  // PIN keamanan global (batal meja/cancel transaksi/hapus keep transaction) - lihat Pin.php
+  static const String pinStatus = "$baseUrl/Pin/status";
+  static const String pinSet = "$baseUrl/Pin/set_pin";
+  static const String pinSetActive = "$baseUrl/Pin/set_active";
+  static const String pinVerify = "$baseUrl/Pin/verify";
+
   // Setting
   static const String categoryMejaList = "$baseUrl/Setting/category_meja";
   static const String addCategoryMeja = "$baseUrl/Setting/add_category_meja";

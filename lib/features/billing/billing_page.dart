@@ -13,6 +13,7 @@ import '../../services/receipt_printer_service.dart';
 import '../../services/session_storage.dart';
 import '../../shared/widgets/app_layout.dart';
 import '../../shared/widgets/app_toast.dart';
+import '../../shared/widgets/pin_guard.dart';
 import '../cashier/data/cashier_repository.dart';
 import 'data/billing_repository.dart';
 import 'data/invoice_repository.dart';
@@ -361,6 +362,9 @@ class _BillingPageState extends State<BillingPage> {
     );
 
     if (confirmed != true) return;
+
+    if (!mounted) return;
+    if (!await PinGuard.confirm(context)) return;
 
     try {
       final session = await _sessionStorage.getSession();

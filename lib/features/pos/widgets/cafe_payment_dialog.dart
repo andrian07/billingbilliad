@@ -252,7 +252,7 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     style: AppText.body,
                     decoration: _inputDecoration(
-                      hint: "Takeaway / Meja 1",
+                      hint: "Kosongkan jika tanpa meja",
                       prefixIcon: Icons.table_bar_rounded,
                     ),
                   ),

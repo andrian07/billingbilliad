@@ -117,6 +117,7 @@ class CafeReportRow {
   final int tax;
   final int totalBill;
   final String status;
+  final String? cancelledBy;
 
   const CafeReportRow({
     required this.id,
@@ -130,6 +131,7 @@ class CafeReportRow {
     required this.tax,
     required this.totalBill,
     required this.status,
+    this.cancelledBy,
   });
 
   factory CafeReportRow.fromJson(Map<String, dynamic> json) {
@@ -148,6 +150,7 @@ class CafeReportRow {
       tax: _asInt(json['tax']),
       totalBill: _asInt(json['total_bill']),
       status: json['status']?.toString() ?? "",
+      cancelledBy: json['cancelled_by']?.toString(),
     );
   }
 }

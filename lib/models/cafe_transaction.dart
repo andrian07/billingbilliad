@@ -19,6 +19,7 @@ class CafeTransaction {
   final String createdBy;
   final DateTime createdAt;
   final int paidBy;
+  final String? cancelledBy;
 
   const CafeTransaction({
     required this.id,
@@ -38,6 +39,7 @@ class CafeTransaction {
     required this.createdBy,
     required this.createdAt,
     required this.paidBy,
+    this.cancelledBy,
   });
 
   factory CafeTransaction.fromJson(
@@ -77,6 +79,7 @@ class CafeTransaction {
           DateTime.tryParse(json['created_at']?.toString() ?? "") ??
           DateTime.now(),
       paidBy: asInt(json['paid_by']),
+      cancelledBy: json['cancelled_by']?.toString(),
     );
   }
 }
@@ -161,6 +164,7 @@ class CafeTransactionDetail {
   final String createdBy;
   final int paidBy;
   final String paymentMethod;
+  final String? cancelledBy;
 
   const CafeTransactionDetail({
     required this.id,
@@ -177,6 +181,7 @@ class CafeTransactionDetail {
     required this.createdBy,
     required this.paidBy,
     required this.paymentMethod,
+    this.cancelledBy,
   });
 
   factory CafeTransactionDetail.fromJson(Map<String, dynamic> json) {
@@ -210,6 +215,7 @@ class CafeTransactionDetail {
       createdBy: json['created_by']?.toString() ?? "",
       paidBy: asInt(json['paid_by']),
       paymentMethod: json['payment_name']?.toString() ?? "-",
+      cancelledBy: json['cancelled_by']?.toString(),
     );
   }
 }

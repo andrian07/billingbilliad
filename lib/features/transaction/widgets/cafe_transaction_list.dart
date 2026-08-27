@@ -12,6 +12,7 @@ import '../../../models/transaction.dart';
 import '../../../services/receipt_printer_service.dart';
 import '../../../services/session_storage.dart';
 import '../../../shared/widgets/app_toast.dart';
+import '../../../shared/widgets/pin_guard.dart';
 import '../data/transaction_repository.dart';
 import 'edit_payment_dialog.dart';
 
@@ -172,6 +173,9 @@ class CafeTransactionListState extends State<CafeTransactionList> {
     );
 
     if (confirmed != true) return;
+
+    if (!mounted) return;
+    if (!await PinGuard.confirm(context)) return;
 
     setState(() => _cancelingId = transaction.id);
     try {
@@ -409,23 +413,41 @@ class CafeTransactionListState extends State<CafeTransactionList> {
           style: cellStyle.copyWith(fontWeight: FontWeight.w600),
         ),
         kasir: Text(transaction.createdBy, style: cellStyle),
-        status: Align(
-          alignment: Alignment.center,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: .15),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Text(
-              isCompleted ? "Selesai" : "Dibatalkan",
-              style: AppText.caption.copyWith(
-                fontSize: 10,
-                color: statusColor,
-                fontWeight: FontWeight.w600,
+        status: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: statusColor.withValues(alpha: .15),
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Text(
+                isCompleted ? "Selesai" : "Dibatalkan",
+                style: AppText.caption.copyWith(
+                  fontSize: 10,
+                  color: statusColor,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          ),
+            if (!isCompleted && transaction.cancelledBy != null) ...[
+              const SizedBox(height: 2),
+              Tooltip(
+                message: "Dibatalkan oleh ${transaction.cancelledBy}",
+                child: Text(
+                  "oleh ${transaction.cancelledBy}",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: AppText.caption.copyWith(
+                    fontSize: 9,
+                    color: AppColors.textHint,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
         aksi: isCompleted
             ? Row(

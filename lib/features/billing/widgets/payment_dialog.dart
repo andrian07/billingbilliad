@@ -8,6 +8,7 @@ import '../../../models/payment_method.dart';
 import '../../../models/pool_table.dart';
 import '../../../models/promo.dart';
 import '../../../services/session_storage.dart';
+import '../../../shared/widgets/app_toast.dart';
 import '../../payment/data/payment_method_repository.dart';
 import '../../promo/data/promo_repository.dart';
 import '../data/billing_repository.dart';
@@ -147,7 +148,29 @@ class _PaymentDialogState extends State<PaymentDialog> {
     }
   }
 
+  /// Promos with an hour limit (Fix-type "package" promos, e.g. "Promo 2
+  /// Jam") can't be applied once the table has actually been running longer
+  /// than that — running *less* than the limit is fine (a 2-hour package
+  /// picked after 1.5 hours of play is a normal case). Mirrors the backend
+  /// guard in `Billing_model::calculate_price()`, which is what actually
+  /// enforces this at payment time — this is just the immediate UI notice.
   void _selectPromo(Promo? promo) {
+    if (promo != null && promo.hourGained != null) {
+      final startAt = widget.table.startAt;
+      final elapsedHours = startAt != null
+          ? DateTime.now().difference(startAt).inSeconds / 3600
+          : 0.0;
+      if (elapsedHours > promo.hourGained!) {
+        AppToast.error(
+          context,
+          "Promo \"${promo.name}\" hanya berlaku maksimal ${promo.hourGained} jam "
+          "(waktu main sudah berjalan ${elapsedHours.toStringAsFixed(1)} jam).",
+        );
+        setState(() {}); // snap the dropdown back to the still-selected promo
+        return;
+      }
+    }
+
     setState(() {
       _selectedPromo = promo;
 
@@ -396,6 +419,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
             : _promoLoadError != null
             ? _buildInlineError(_promoLoadError!, onRetry: _loadPromos)
             : DropdownButtonFormField<Promo?>(
+                key: ValueKey(_selectedPromo?.id ?? 0),
                 initialValue: _selectedPromo,
                 dropdownColor: AppColors.card,
                 style: AppText.body,

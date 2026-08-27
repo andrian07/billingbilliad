@@ -9,6 +9,9 @@ import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/app_layout.dart';
 import '../../shared/widgets/app_toast.dart';
 import 'data/change_password_repository.dart';
+import 'widgets/pin_setting_form.dart';
+
+enum _SettingTab { password, pin }
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -30,6 +33,21 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   bool _obscureNew = true;
   bool _obscureConfirm = true;
   bool _submitting = false;
+
+  _SettingTab _activeTab = _SettingTab.password;
+  bool _isOwner = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRole();
+  }
+
+  Future<void> _loadRole() async {
+    final isOwner = await _sessionStorage.isSuperadmin();
+    if (!mounted) return;
+    setState(() => _isOwner = isOwner);
+  }
 
   @override
   void dispose() {
@@ -81,11 +99,88 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       showSearch: false,
       activeMenuKey: "ganti_password",
       onMenuSelect: (key) => navigateToMenu(context, key),
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 460),
-          child: AppCard(child: _buildForm()),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(width: 220, child: _buildSubMenu()),
+            const SizedBox(width: 16),
+            Expanded(
+              child: AppCard(
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 460),
+                    child: _activeTab == _SettingTab.password
+                        ? _buildForm()
+                        : const PinSettingForm(),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubMenu() {
+    return AppCard(
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _subMenuItem(
+            icon: Icons.lock_reset_rounded,
+            label: "Ganti Password",
+            tab: _SettingTab.password,
+          ),
+          if (_isOwner) ...[
+            const SizedBox(height: 4),
+            _subMenuItem(
+              icon: Icons.pin_outlined,
+              label: "PIN",
+              tab: _SettingTab.pin,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _subMenuItem({
+    required IconData icon,
+    required String label,
+    required _SettingTab tab,
+  }) {
+    final selected = _activeTab == tab;
+    return Material(
+      color: selected ? AppColors.primary.withValues(alpha: .12) : Colors.transparent,
+      borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+      child: InkWell(
+        onTap: () => setState(() => _activeTab = tab),
+        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: selected ? AppColors.primary : AppColors.textSecondary,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  label,
+                  style: AppText.body.copyWith(
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                    color: selected ? AppColors.primary : AppColors.text,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

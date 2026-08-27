@@ -165,8 +165,8 @@ class CafeRepository {
     return KeepTransactionDetail.fromJson(result);
   }
 
-  /// Renames a held transaction (e.g. "Takeaway" -> the customer's actual
-  /// name) — only takes effect while it's still status Keep. Passing an
+  /// Renames a held transaction (e.g. an unnamed order -> the customer's
+  /// actual name) — only takes effect while it's still status Keep. Passing an
   /// empty [name] clears it back to unnamed.
   Future<void> renameKeepTransaction(
     int keepTransactionId,
