@@ -177,6 +177,19 @@ class TransactionRepository {
     });
   }
 
+  /// [createdBy] is who's performing the cancellation (not who made the
+  /// original sale) — mirrors [cancelCafeTransaction], but a billing
+  /// transaction has no product stock to restore.
+  Future<void> cancelBillingTransaction(
+    int transactionId, {
+    required String createdBy,
+  }) async {
+    await _post(ApiEndpoints.cancelTransaction, {
+      "transaction_id": transactionId,
+      "created_by": createdBy,
+    });
+  }
+
   /// Rejected server-side (and should be kept out of reach client-side too)
   /// when the transaction's old or new payment method is "Potong Saldo" —
   /// no logic exists to correct the customer's saldo for a payment-method

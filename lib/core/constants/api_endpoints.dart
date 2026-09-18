@@ -69,6 +69,7 @@ class ApiEndpoints {
   static const String transactionDetail = "$baseUrl/Billing/transaction_detail";
   static const String editPaymentTransaction =
       "$baseUrl/Billing/edit_payment_transaction";
+  static const String cancelTransaction = "$baseUrl/Billing/cancel_transaction";
   static const String settingTable = "$baseUrl/Billing/setting_table";
   static const String updateSettingTable =
       "$baseUrl/Billing/update_setting_table";

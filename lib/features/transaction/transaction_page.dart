@@ -15,6 +15,7 @@ import '../../services/session_storage.dart';
 import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/app_layout.dart';
 import '../../shared/widgets/app_toast.dart';
+import '../../shared/widgets/pin_guard.dart';
 import 'data/transaction_repository.dart';
 import 'widgets/cafe_transaction_list.dart';
 import 'widgets/edit_payment_dialog.dart';
@@ -52,6 +53,7 @@ class _TransactionPageState extends State<TransactionPage> {
   bool _sortAscending = false;
   int? _reprintingId;
   int? _editingPaymentId;
+  int? _cancelingId;
 
   @override
   void initState() {
@@ -175,6 +177,66 @@ class _TransactionPageState extends State<TransactionPage> {
       AppToast.error(context, e.message);
     } finally {
       if (mounted) setState(() => _editingPaymentId = null);
+    }
+  }
+
+  Future<void> _cancelTransaction(Transaction transaction) async {
+    if (_cancelingId != null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSizes.radiusLarge),
+        ),
+        title: Text("Batalkan Transaksi?", style: AppText.title),
+        content: Text(
+          "Transaksi ${transaction.invoiceNumber} akan ditandai dibatalkan "
+          "dan tidak lagi dihitung ke total transaksi.",
+          style: AppText.bodySecondary,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text("TIDAK"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.danger,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text("YA, BATALKAN"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    if (!mounted) return;
+    if (!await PinGuard.confirm(context)) return;
+
+    setState(() => _cancelingId = transaction.id);
+    try {
+      final session = await SessionStorage().getSession();
+      final createdBy = session?['username']?.toString() ?? "";
+      await _repository.cancelBillingTransaction(
+        transaction.id,
+        createdBy: createdBy,
+      );
+      if (!mounted) return;
+      AppToast.success(
+        context,
+        "Transaksi ${transaction.invoiceNumber} dibatalkan",
+      );
+      await _load();
+    } on TransactionRepositoryException catch (e) {
+      if (!mounted) return;
+      AppToast.error(context, e.message);
+    } finally {
+      if (mounted) setState(() => _cancelingId = null);
     }
   }
 
@@ -526,6 +588,8 @@ class _TransactionPageState extends State<TransactionPage> {
                       onEditPayment: () => _editPayment(pageItems[index]),
                       editingPayment:
                           _editingPaymentId == pageItems[index].id,
+                      onCancel: () => _cancelTransaction(pageItems[index]),
+                      canceling: _cancelingId == pageItems[index].id,
                     ),
                   ),
           ),
@@ -680,6 +744,8 @@ class _TransactionRow extends StatelessWidget {
   final bool reprinting;
   final VoidCallback? onEditPayment;
   final bool editingPayment;
+  final VoidCallback? onCancel;
+  final bool canceling;
 
   const _TransactionRow.header({
     required this.sortField,
@@ -694,7 +760,9 @@ class _TransactionRow extends StatelessWidget {
        onReprint = null,
        reprinting = false,
        onEditPayment = null,
-       editingPayment = false;
+       editingPayment = false,
+       onCancel = null,
+       canceling = false;
 
   const _TransactionRow.data({
     required this.no,
@@ -705,6 +773,8 @@ class _TransactionRow extends StatelessWidget {
     this.reprinting = false,
     this.onEditPayment,
     this.editingPayment = false,
+    this.onCancel,
+    this.canceling = false,
   }) : header = false,
        sortField = null,
        sortAscending = false,
@@ -776,26 +846,44 @@ class _TransactionRow extends StatelessWidget {
             textAlign: TextAlign.end,
             style: cellStyle.copyWith(fontWeight: FontWeight.w600),
           ),
-          status: Align(
-            alignment: Alignment.center,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 3,
-              ),
-              decoration: BoxDecoration(
-                color: statusColor.withValues(alpha: .15),
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Text(
-                isCompleted ? "Selesai" : "Dibatalkan",
-                style: AppText.caption.copyWith(
-                  fontSize: 10,
-                  color: statusColor,
-                  fontWeight: FontWeight.w600,
+          status: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: .15),
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Text(
+                  isCompleted ? "Selesai" : "Dibatalkan",
+                  style: AppText.caption.copyWith(
+                    fontSize: 10,
+                    color: statusColor,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-            ),
+              if (!isCompleted && t.cancelledBy != null) ...[
+                const SizedBox(height: 2),
+                Tooltip(
+                  message: "Dibatalkan oleh ${t.cancelledBy}",
+                  child: Text(
+                    "oleh ${t.cancelledBy}",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: AppText.caption.copyWith(
+                      fontSize: 9,
+                      color: AppColors.textHint,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
           aksi: isCompleted
               ? Row(
@@ -812,6 +900,11 @@ class _TransactionRow extends StatelessWidget {
                         onTap: onEditPayment,
                       ),
                     ],
+                    const SizedBox(width: 6),
+                    _CancelButton(
+                      canceling: canceling,
+                      onTap: onCancel,
+                    ),
                   ],
                 )
               : const SizedBox.shrink(),
@@ -923,7 +1016,7 @@ class _TransactionRow extends StatelessWidget {
         const SizedBox(width: 12),
         SizedBox(width: 90, child: status),
         const SizedBox(width: 12),
-        SizedBox(width: 96, child: aksi),
+        SizedBox(width: 132, child: aksi),
       ],
     );
   }
@@ -1016,6 +1109,53 @@ class _EditPaymentButton extends StatelessWidget {
             Icons.sync_alt_rounded,
             size: 16,
             color: AppColors.textSecondary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CancelButton extends StatelessWidget {
+  final bool canceling;
+  final VoidCallback? onTap;
+
+  const _CancelButton({required this.canceling, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    if (canceling) {
+      return const SizedBox(
+        width: 30,
+        height: 30,
+        child: Center(
+          child: SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      );
+    }
+
+    return Tooltip(
+      message: "Batalkan transaksi",
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        child: Container(
+          width: 30,
+          height: 30,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: const Icon(
+            Icons.cancel_outlined,
+            size: 16,
+            color: AppColors.danger,
           ),
         ),
       ),

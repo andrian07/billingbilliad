@@ -15,6 +15,7 @@ class Transaction {
   final String paymentMethod;
   final int total;
   final TransactionStatus status;
+  final String? cancelledBy;
 
   const Transaction({
     required this.id,
@@ -29,6 +30,7 @@ class Transaction {
     required this.paymentMethod,
     required this.total,
     this.status = TransactionStatus.completed,
+    this.cancelledBy,
   });
 
   factory Transaction.fromJson(
@@ -52,6 +54,7 @@ class Transaction {
       paymentMethod: paymentMethodName ?? "-",
       total: _asInt(json['total_bill']),
       status: _parseStatus(json['status']),
+      cancelledBy: json['cancelled_by']?.toString(),
     );
   }
 }
