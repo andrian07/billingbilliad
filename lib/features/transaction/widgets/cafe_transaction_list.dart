@@ -605,6 +605,7 @@ class CafeTransactionListState extends State<CafeTransactionList> {
       invoice: _headerText("No. Invoice"),
       tanggal: _headerText("Tanggal"),
       meja: _headerText("Meja"),
+      promo: _headerText("Promo"),
       total: _headerText("Total", alignEnd: true),
       kasir: _headerText("Kasir"),
       status: _headerText("Status", alignCenter: true),
@@ -635,7 +636,34 @@ class CafeTransactionListState extends State<CafeTransactionList> {
           style: cellStyle.copyWith(fontWeight: FontWeight.w600),
         ),
         tanggal: Text(formatDate(transaction.date), style: cellStyle),
-        meja: Text(transaction.table ?? "-", style: cellStyle),
+        meja: transaction.table == null
+            ? Text("-", style: cellStyle)
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Meja ${transaction.table!.padLeft(2, '0')}",
+                    style: cellStyle,
+                  ),
+                  if (transaction.tableCategory != null)
+                    Text(
+                      transaction.tableCategory!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: cellStyle.copyWith(
+                        fontSize: 10,
+                        color: AppColors.textHint,
+                      ),
+                    ),
+                ],
+              ),
+        promo: Text(
+          transaction.promoCafeNames ?? "-",
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: cellStyle,
+        ),
         total: Text(
           formatCurrency(transaction.totalBill),
           textAlign: TextAlign.end,
@@ -731,6 +759,7 @@ class CafeTransactionListState extends State<CafeTransactionList> {
     required Widget invoice,
     required Widget tanggal,
     required Widget meja,
+    required Widget promo,
     required Widget total,
     required Widget kasir,
     required Widget status,
@@ -746,6 +775,8 @@ class CafeTransactionListState extends State<CafeTransactionList> {
         Expanded(flex: 2, child: tanggal),
         const SizedBox(width: 12),
         Expanded(flex: 1, child: meja),
+        const SizedBox(width: 12),
+        Expanded(flex: 2, child: promo),
         const SizedBox(width: 12),
         Expanded(flex: 2, child: total),
         const SizedBox(width: 12),

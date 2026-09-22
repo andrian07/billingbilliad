@@ -1,7 +1,7 @@
 class ApiEndpoints {
   ApiEndpoints._();
 
-  static const String baseUrl = "http://localhost/billing_api_billiard";
+  static const String baseUrl = "http://localhost/billiard_backend";
 
   // Auth
   static const String login = "$baseUrl/Auth/login";
@@ -27,6 +27,14 @@ class ApiEndpoints {
   static const String addPromo = "$baseUrl/Master/add_promo";
   static const String editPromo = "$baseUrl/Master/edit_promo";
   static const String deletePromo = "$baseUrl/Master/delete_promo";
+
+  // Master promo cafe (menempel ke produk, beda dari promo billing di atas)
+  static const String promoCafeList = "$baseUrl/Master/promo_cafe_list";
+  static const String promoCafeListNoPaging =
+      "$baseUrl/Master/promo_cafe_list_no_pagging";
+  static const String addPromoCafe = "$baseUrl/Master/add_promo_cafe";
+  static const String editPromoCafe = "$baseUrl/Master/edit_promo_cafe";
+  static const String deletePromoCafe = "$baseUrl/Master/delete_promo_cafe";
 
   // Master category
   static const String categoryList = "$baseUrl/Master/category_list";
@@ -88,7 +96,8 @@ class ApiEndpoints {
       "$baseUrl/Cafe/rename_keep_transaction";
   static const String transactionCafeList =
       "$baseUrl/Cafe/transaction_cafe_list";
-  static const String transactionCafeDetail = "$baseUrl/Cafe/transaction_detail";
+  static const String transactionCafeDetail =
+      "$baseUrl/Cafe/transaction_detail";
   static const String cancelTransactionCafe =
       "$baseUrl/Cafe/cancel_transaction_cafe";
   static const String editPaymentTransactionCafe =
@@ -121,12 +130,16 @@ class ApiEndpoints {
   static const String purchaseReport = "$baseUrl/Report/purchase_report";
   static const String purchaseSuppliers = "$baseUrl/Report/purchase_suppliers";
 
+  // Admin sync (antrian sinkron ke "onlinereport" eksternal yang gagal - lihat Admin_sync.php
+  // & Online_report.php di backend, dipakai halaman Sync Online di left menu)
+  static const String syncQueueList = "$baseUrl/Admin_sync/sync_queue_list";
+  static const String syncRetryQueueItem =
+      "$baseUrl/Admin_sync/retry_queue_item";
+
   // Access (roles & menu permissions)
-  static const String roleListNoPaging =
-      "$baseUrl/Access/role_list_no_pagging";
+  static const String roleListNoPaging = "$baseUrl/Access/role_list_no_pagging";
   static const String addRole = "$baseUrl/Access/add_role";
-  static const String menuListNoPaging =
-      "$baseUrl/Access/menu_list_no_pagging";
+  static const String menuListNoPaging = "$baseUrl/Access/menu_list_no_pagging";
   static const String roleAccess = "$baseUrl/Access/role_access";
   static const String updateRoleAccess = "$baseUrl/Access/update_role_access";
 }

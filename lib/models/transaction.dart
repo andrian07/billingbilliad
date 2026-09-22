@@ -9,6 +9,7 @@ class Transaction {
   final DateTime startAt;
   final DateTime endAt;
   final String tableName;
+  final String? tableCategory;
   final String? promoName;
   final String cashierName;
   final int paymentId;
@@ -24,6 +25,7 @@ class Transaction {
     required this.startAt,
     required this.endAt,
     required this.tableName,
+    this.tableCategory,
     this.promoName,
     required this.cashierName,
     required this.paymentId,
@@ -48,6 +50,7 @@ class Transaction {
       startAt: _combineDateTime(date, json['start_time']?.toString()),
       endAt: _combineDateTime(date, json['end_time']?.toString()),
       tableName: "Meja ${tableNumber.toString().padLeft(2, '0')}",
+      tableCategory: json['table_category']?.toString(),
       promoName: promoName,
       cashierName: json['created_by']?.toString() ?? "",
       paymentId: _asInt(json['payment_id']),
@@ -74,6 +77,7 @@ class TransactionDetail {
   final int tax;
   final int totalBill;
   final String tableName;
+  final String? tableCategory;
   final TransactionStatus status;
   final String createdBy;
   final int paidBy;
@@ -92,6 +96,7 @@ class TransactionDetail {
     required this.tax,
     required this.totalBill,
     required this.tableName,
+    this.tableCategory,
     required this.status,
     required this.createdBy,
     required this.paidBy,
@@ -119,6 +124,7 @@ class TransactionDetail {
       tax: _asInt(json['tax']),
       totalBill: _asInt(json['total_bill']),
       tableName: "Meja ${tableNumber.toString().padLeft(2, '0')}",
+      tableCategory: json['table_category']?.toString(),
       status: _parseStatus(json['status']),
       createdBy: json['created_by']?.toString() ?? "",
       paidBy: _asInt(json['paid_by']),

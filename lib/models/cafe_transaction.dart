@@ -6,11 +6,17 @@ class CafeTransaction {
   final String invoiceNumber;
   final DateTime date;
   final String? table;
+  final String? tableCategory;
   final String? customerName;
   final int paymentId;
   final String? paymentName;
   final int? promoId;
   final String? promoName;
+  /// Distinct cafe-promo names (product price overrides) applied to this
+  /// sale's line items — comma-joined by the backend. Separate from
+  /// [promoId]/[promoName], which are for the old unused whole-cart promo
+  /// concept; see PromoCafe.
+  final String? promoCafeNames;
   final int subTotal;
   final int discount;
   final int tax;
@@ -26,11 +32,13 @@ class CafeTransaction {
     required this.invoiceNumber,
     required this.date,
     this.table,
+    this.tableCategory,
     this.customerName,
     required this.paymentId,
     this.paymentName,
     this.promoId,
     this.promoName,
+    this.promoCafeNames,
     required this.subTotal,
     required this.discount,
     required this.tax,
@@ -62,11 +70,13 @@ class CafeTransaction {
       invoiceNumber: json['inv']?.toString() ?? "",
       date: DateTime.tryParse(json['date']?.toString() ?? "") ?? DateTime.now(),
       table: json['table']?.toString(),
+      tableCategory: json['table_category']?.toString(),
       customerName: json['customer_name']?.toString(),
       paymentId: asInt(json['payment_id']),
       paymentName: paymentName,
       promoId: asOptionalId(json['promo_id']),
       promoName: promoName,
+      promoCafeNames: json['promo_cafe_names']?.toString(),
       subTotal: asInt(json['sub_total']),
       discount: asInt(json['discount']),
       tax: asInt(json['tax']),
@@ -113,6 +123,7 @@ class CafeTransactionDetailItem {
   final String name;
   final int quantity;
   final int price;
+  final String? promoCafeName;
   final String? note;
   final List<CafeTransactionAddonItem> addons;
 
@@ -120,6 +131,7 @@ class CafeTransactionDetailItem {
     required this.name,
     required this.quantity,
     required this.price,
+    this.promoCafeName,
     this.note,
     this.addons = const [],
   });
@@ -136,6 +148,7 @@ class CafeTransactionDetailItem {
       name: json['product_name']?.toString() ?? "",
       quantity: asInt(json['qty']),
       price: asInt(json['price']),
+      promoCafeName: json['promo_cafe_name']?.toString(),
       note: json['note']?.toString(),
       addons: rawAddons is List
           ? rawAddons
@@ -154,6 +167,7 @@ class CafeTransactionDetail {
   final String invoiceNumber;
   final DateTime date;
   final String? table;
+  final String? tableCategory;
   final String? customerName;
   final List<CafeTransactionDetailItem> items;
   final int subTotal;
@@ -171,6 +185,7 @@ class CafeTransactionDetail {
     required this.invoiceNumber,
     required this.date,
     this.table,
+    this.tableCategory,
     this.customerName,
     required this.items,
     required this.subTotal,
@@ -198,6 +213,7 @@ class CafeTransactionDetail {
       date:
           DateTime.tryParse(json['date']?.toString() ?? "") ?? DateTime.now(),
       table: json['table']?.toString(),
+      tableCategory: json['table_category']?.toString(),
       customerName: json['customer_name']?.toString(),
       items: rawItems is List
           ? rawItems

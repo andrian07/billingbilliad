@@ -38,6 +38,7 @@ class CafeRepository {
 
   Future<int> submitTransactionCafe({
     int? promoId,
+    int? promoCafeId,
     required int paymentId,
     int? table,
     String? customerName,
@@ -49,6 +50,7 @@ class CafeRepository {
   }) async {
     final data = await _post(ApiEndpoints.saveTransactionCafe, {
       "promo_id": promoId ?? 0,
+      "promo_cafe_id": promoCafeId ?? 0,
       "payment_id": paymentId,
       "table": table,
       "customer_name": customerName,

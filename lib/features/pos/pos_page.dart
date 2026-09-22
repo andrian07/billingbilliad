@@ -1116,7 +1116,10 @@ class _CartRow extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(formatCurrency(item.product.price), style: AppText.caption),
+              Text(
+                formatCurrency(item.product.price),
+                style: AppText.caption,
+              ),
               Row(
                 children: [
                   _qtyButton(Icons.remove_rounded, onDecrement),

@@ -217,7 +217,13 @@ class _TransactionDetailDialogState extends State<TransactionDetailDialog> {
           ),
           child: Column(
             children: [
-              _kv(Icons.table_bar_rounded, "Meja", detail.tableName),
+              _kv(
+                Icons.table_bar_rounded,
+                "Meja",
+                detail.tableCategory != null
+                    ? "${detail.tableName} (${detail.tableCategory})"
+                    : detail.tableName,
+              ),
               const SizedBox(height: 10),
               _kv(
                 Icons.sports_esports_rounded,

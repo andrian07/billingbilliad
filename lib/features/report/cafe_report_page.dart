@@ -510,7 +510,9 @@ class _CafeReportRowWidget extends StatelessWidget {
         invoice: _headerText("No. Invoice"),
         tanggal: _headerText("Tanggal"),
         jam: _headerText("Jam"),
+        meja: _headerText("Meja"),
         kasir: _headerText("Kasir"),
+        promo: _headerText("Promo"),
         payment: _headerText("Pembayaran"),
         subTotal: _headerText("Subtotal", alignEnd: true),
         diskon: _headerText("Diskon", alignEnd: true),
@@ -536,7 +538,35 @@ class _CafeReportRowWidget extends StatelessWidget {
         ),
         tanggal: Text(formatDate(r.date), style: cellStyle),
         jam: Text(formatTime(r.time), style: cellStyle),
+        meja: r.table == null
+            ? Text("-", style: cellStyle.copyWith(color: AppColors.textHint))
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Meja ${r.table.toString().padLeft(2, '0')}",
+                    style: cellStyle,
+                  ),
+                  if (r.tableCategory != null)
+                    Text(
+                      r.tableCategory!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: cellStyle.copyWith(
+                        fontSize: 10,
+                        color: AppColors.textHint,
+                      ),
+                    ),
+                ],
+              ),
         kasir: Text(r.kasirName, maxLines: 1, overflow: TextOverflow.ellipsis, style: cellStyle),
+        promo: Text(
+          r.promoNames ?? "-",
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: cellStyle,
+        ),
         payment: Text(r.paymentName, style: cellStyle),
         subTotal: Text(
           formatCurrency(r.subTotal),
@@ -618,7 +648,9 @@ class _CafeReportRowWidget extends StatelessWidget {
     required Widget invoice,
     required Widget tanggal,
     required Widget jam,
+    required Widget meja,
     required Widget kasir,
+    required Widget promo,
     required Widget payment,
     required Widget subTotal,
     required Widget diskon,
@@ -636,7 +668,11 @@ class _CafeReportRowWidget extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(flex: 1, child: jam),
         const SizedBox(width: 10),
+        SizedBox(width: 100, child: meja),
+        const SizedBox(width: 10),
         Expanded(flex: 2, child: kasir),
+        const SizedBox(width: 10),
+        Expanded(flex: 2, child: promo),
         const SizedBox(width: 10),
         Expanded(flex: 2, child: payment),
         const SizedBox(width: 10),

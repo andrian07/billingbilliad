@@ -833,7 +833,23 @@ class _TransactionRow extends StatelessWidget {
           tanggal: Text(formatDate(t.date), style: cellStyle),
           jamMulai: Text(formatTime(t.startAt), style: cellStyle),
           jamSelesai: Text(formatTime(t.endAt), style: cellStyle),
-          meja: Text(t.tableName, style: cellStyle),
+          meja: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(t.tableName, style: cellStyle),
+              if (t.tableCategory != null)
+                Text(
+                  t.tableCategory!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: cellStyle.copyWith(
+                    fontSize: 10,
+                    color: AppColors.textHint,
+                  ),
+                ),
+            ],
+          ),
           promo: Text(
             t.promoName ?? "-",
             maxLines: 1,

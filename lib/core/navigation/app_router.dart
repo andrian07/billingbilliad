@@ -19,6 +19,7 @@ import '../../features/role/role_page.dart';
 import '../../features/settings/change_password_page.dart';
 import '../../features/settings/settings_page.dart';
 import '../../features/settings/table_setting_page.dart';
+import '../../features/sync/sync_online_page.dart';
 import '../../features/transaction/transaction_page.dart';
 import '../../features/unit/unit_page.dart';
 import '../../features/user/user_page.dart';
@@ -161,6 +162,11 @@ final appRouter = GoRouter(
       path: "/setting/ganti-password",
       pageBuilder: (context, state) =>
           _fadeThroughPage(const ChangePasswordPage()),
+    ),
+    GoRoute(
+      path: "/sync/online",
+      pageBuilder: (context, state) =>
+          _fadeThroughPage(const SyncOnlinePage()),
     ),
   ],
 );

@@ -142,6 +142,19 @@ class AppSidebar extends StatelessWidget {
         ),
       ],
     ),
+    SidebarSection(
+      title: "SISTEM",
+      items: [
+        // Tidak terdaftar di ms_menu/role_access (sama seperti "opname" di
+        // atas) - sengaja hanya muncul untuk owner (allowedMenuKeys == null),
+        // matching Admin_sync.php di backend yang juga owner-only.
+        AppMenuItem(
+          title: "Sync Online",
+          icon: Icons.sync_problem_rounded,
+          menuKey: "sync_online",
+        ),
+      ],
+    ),
   ];
 
   static const _logoutItem = AppMenuItem(

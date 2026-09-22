@@ -40,8 +40,13 @@ class BillingReportRow {
   final DateTime date;
   final String startTime;
   final String endTime;
+  final int table;
+  final String? tableCategory;
   final String kasirName;
   final String paymentName;
+  final String? promoName;
+  final String? promoTipe;
+  final int promoValue;
   final int subTotal;
   final int discount;
   final int tax;
@@ -54,14 +59,24 @@ class BillingReportRow {
     required this.date,
     required this.startTime,
     required this.endTime,
+    required this.table,
+    this.tableCategory,
     required this.kasirName,
     required this.paymentName,
+    this.promoName,
+    this.promoTipe,
+    this.promoValue = 0,
     required this.subTotal,
     required this.discount,
     required this.tax,
     required this.totalBill,
     required this.status,
   });
+
+  /// True for a "Fix" (whole-bill package) billing promo, where [discount]
+  /// isn't a meaningful figure — the package price is already baked into
+  /// [totalBill] (see Report.php's $is_fix_promo / Billing_model::calculate_price).
+  bool get isFixPromo => promoName != null && promoTipe == "Fix";
 
   factory BillingReportRow.fromJson(Map<String, dynamic> json) {
     return BillingReportRow(
@@ -70,8 +85,13 @@ class BillingReportRow {
       date: DateTime.tryParse(json['date']?.toString() ?? "") ?? DateTime.now(),
       startTime: json['start_time']?.toString() ?? "-",
       endTime: json['end_time']?.toString() ?? "-",
+      table: _asInt(json['table']),
+      tableCategory: json['table_category']?.toString(),
       kasirName: json['kasir_name']?.toString() ?? "",
       paymentName: json['payment_name']?.toString() ?? "-",
+      promoName: json['promo_name']?.toString(),
+      promoTipe: json['promo_tipe']?.toString(),
+      promoValue: _asInt(json['promo_value']),
       subTotal: _asInt(json['sub_total']),
       discount: _asInt(json['discount']),
       tax: _asInt(json['tax']),
@@ -110,6 +130,9 @@ class CafeReportRow {
   final String invoiceNumber;
   final DateTime date;
   final DateTime time;
+  final int? table;
+  final String? tableCategory;
+  final String? promoNames;
   final String kasirName;
   final String paymentName;
   final int subTotal;
@@ -124,6 +147,9 @@ class CafeReportRow {
     required this.invoiceNumber,
     required this.date,
     required this.time,
+    this.table,
+    this.tableCategory,
+    this.promoNames,
     required this.kasirName,
     required this.paymentName,
     required this.subTotal,
@@ -137,12 +163,16 @@ class CafeReportRow {
   factory CafeReportRow.fromJson(Map<String, dynamic> json) {
     final date = DateTime.tryParse(json['date']?.toString() ?? "") ??
         DateTime.now();
+    final rawTable = json['table'];
 
     return CafeReportRow(
       id: _asInt(json['id']),
       invoiceNumber: json['inv']?.toString() ?? "",
       date: date,
       time: DateTime.tryParse(json['time']?.toString() ?? "") ?? date,
+      table: rawTable == null ? null : _asInt(rawTable),
+      tableCategory: json['table_category']?.toString(),
+      promoNames: json['promo_names']?.toString(),
       kasirName: json['kasir_name']?.toString() ?? "",
       paymentName: json['payment_name']?.toString() ?? "-",
       subTotal: _asInt(json['sub_total']),

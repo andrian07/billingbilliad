@@ -7,8 +7,11 @@ import '../../../core/theme/app_text.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../models/cart_item.dart';
 import '../../../models/payment_method.dart';
+import '../../../models/promo.dart';
+import '../../../models/promo_cafe.dart';
 import '../../../services/session_storage.dart';
 import '../../payment/data/payment_method_repository.dart';
+import '../../promo/data/promo_cafe_repository.dart';
 import '../data/cafe_repository.dart';
 
 class CafePaymentResult {
@@ -54,6 +57,7 @@ class CafePaymentDialog extends StatefulWidget {
 class _CafePaymentDialogState extends State<CafePaymentDialog> {
   final _cafeRepository = CafeRepository();
   final _paymentMethodRepository = PaymentMethodRepository();
+  final _promoCafeRepository = PromoCafeRepository();
   final _sessionStorage = SessionStorage();
 
   final _tableController = TextEditingController();
@@ -63,8 +67,10 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
   bool _loadingOptions = true;
   String? _loadError;
   List<PaymentMethod> _paymentMethods = [];
+  List<PromoCafe> _promoCafes = [];
 
   PaymentMethod? _selectedPaymentMethod;
+  PromoCafe? _selectedPromoCafe;
   bool _printKitchenTicket = false;
 
   bool _submitting = false;
@@ -92,7 +98,32 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
 
   int get _discountAmount => (widget.subtotal * _discountPercent / 100).round();
 
-  int get _totalAfterDiscount => widget.subtotal - _discountAmount;
+  /// Effective unit price of [product] once [promo] is applied.
+  int _promoEffectivePrice(PromoCafe promo, int normalPrice) {
+    if (promo.type == PromoType.fixed) return promo.value;
+    final discounted = (normalPrice * (100 - promo.value) / 100).round();
+    return discounted < 0 ? 0 : discounted;
+  }
+
+  /// Discount from the explicitly-selected [_selectedPromoCafe], applied only
+  /// to cart items whose product is listed in that promo — other items are
+  /// untouched, per the cashier-picks-at-payment flow.
+  int get _promoCafeDiscount {
+    final promo = _selectedPromoCafe;
+    if (promo == null) return 0;
+
+    var total = 0;
+    for (final item in widget.items) {
+      if (!promo.productIds.contains(item.product.id)) continue;
+      final effective = _promoEffectivePrice(promo, item.product.price);
+      final delta = item.product.price - effective;
+      if (delta > 0) total += delta * item.quantity;
+    }
+    return total;
+  }
+
+  int get _totalAfterDiscount =>
+      widget.subtotal - _discountAmount - _promoCafeDiscount;
 
   Future<void> _loadOptions() async {
     setState(() {
@@ -118,6 +149,16 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
         _loadingOptions = false;
       });
     }
+
+    // Best-effort: a failure here shouldn't block payment methods from
+    // being usable, it just means "Pilih Promo" stays empty.
+    try {
+      final promoCafes = await _promoCafeRepository.getAllPromoCafes();
+      if (!mounted) return;
+      setState(() => _promoCafes = promoCafes);
+    } on PromoCafeRepositoryException {
+      // ignore — promo selection is optional
+    }
   }
 
   Future<void> _submit() async {
@@ -137,6 +178,7 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
       final customerName = _customerNameController.text.trim();
 
       final transactionCafeId = await _cafeRepository.submitTransactionCafe(
+        promoCafeId: _selectedPromoCafe?.id,
         paymentId: paymentMethod.id,
         table: table,
         customerName: customerName.isNotEmpty ? customerName : null,
@@ -296,6 +338,39 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
               ),
             ),
           ],
+        ),
+
+        const SizedBox(height: 16),
+        _label("Pilih Promo"),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<PromoCafe?>(
+          initialValue: _selectedPromoCafe,
+          dropdownColor: AppColors.card,
+          style: AppText.body,
+          isExpanded: true,
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: AppColors.textSecondary,
+          ),
+          decoration: _inputDecoration(
+            hint: "Tanpa promo",
+            prefixIcon: Icons.local_offer_outlined,
+          ),
+          items: [
+            const DropdownMenuItem<PromoCafe?>(
+              value: null,
+              child: Text("Tanpa promo"),
+            ),
+            for (final promo in _promoCafes)
+              DropdownMenuItem(
+                value: promo,
+                child: Text(
+                  "${promo.name} (${promo.type == PromoType.fixed ? formatCurrency(promo.value) : '${promo.value}%'})",
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+          ],
+          onChanged: (value) => setState(() => _selectedPromoCafe = value),
         ),
 
         const SizedBox(height: 16),
@@ -500,6 +575,15 @@ class _CafePaymentDialogState extends State<CafePaymentDialog> {
               Icons.percent_rounded,
               "Diskon ($_discountPercent%)",
               "-${formatCurrency(_discountAmount)}",
+              valueColor: AppColors.danger,
+            ),
+          ],
+          if (_selectedPromoCafe != null && _promoCafeDiscount > 0) ...[
+            const SizedBox(height: 10),
+            _kv(
+              Icons.local_offer_outlined,
+              "Diskon Promo Cafe",
+              "-${formatCurrency(_promoCafeDiscount)}",
               valueColor: AppColors.danger,
             ),
           ],
