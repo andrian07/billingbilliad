@@ -155,7 +155,11 @@ class BillingRepository {
     });
   }
 
-  Future<void> submitPayment({
+  /// Returns the transaction's real invoice number (`transaction_inv`, as
+  /// generated and stored by the backend) — the caller must print/display
+  /// this rather than fabricating its own, so a freshly-printed nota always
+  /// matches what a later reprint (from the transaction list) would show.
+  Future<String> submitPayment({
     required String tableId,
     required SessionType? mode,
     required DateTime startTime,
@@ -169,7 +173,7 @@ class BillingRepository {
     required int paymentId,
     int? promoId,
   }) async {
-    await _post(ApiEndpoints.payment, {
+    final data = await _post(ApiEndpoints.payment, {
       if (mode != null)
         "transaction_mode": mode == SessionType.timer ? "Timer" : "Reguler",
       "transaction_payment_id": "$paymentId",
@@ -184,6 +188,8 @@ class BillingRepository {
       "created_by": createdBy,
       "paid_by": "$paidBy",
     });
+
+    return data['transaction_inv']?.toString() ?? "";
   }
 
   Future<Map<String, dynamic>> _post(

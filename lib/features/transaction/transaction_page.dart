@@ -16,6 +16,7 @@ import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/app_layout.dart';
 import '../../shared/widgets/app_toast.dart';
 import '../../shared/widgets/pin_guard.dart';
+import '../../shared/widgets/ticket_preview.dart';
 import 'data/transaction_repository.dart';
 import 'widgets/cafe_transaction_list.dart';
 import 'widgets/edit_payment_dialog.dart';
@@ -110,29 +111,40 @@ class _TransactionPageState extends State<TransactionPage> {
         null => "-",
       };
 
-      await _receiptPrinter.printReceipt(
-        Receipt(
-          businessName: BusinessInfo.name,
-          businessAddress: BusinessInfo.address,
-          invoiceNumber: detail.invoiceNumber,
-          tableLabel: "$tableNumber - $modeLabel",
-          periods: const [],
-          date: detail.date,
-          startAt: detail.startAt,
-          endAt: detail.endAt,
-          totalDuration: detail.endAt.difference(detail.startAt),
-          subtotal: detail.subTotal,
-          discountAmount: detail.discount,
-          promoName: detail.promoName,
-          grandTotal: detail.totalBill,
-          paymentMethod: detail.paymentMethod,
-          cashierName: detail.createdBy,
-          isReprint: true,
-        ),
+      final receipt = Receipt(
+        businessName: BusinessInfo.name,
+        businessAddress: BusinessInfo.address,
+        invoiceNumber: detail.invoiceNumber,
+        tableLabel: "$tableNumber - $modeLabel",
+        periods: const [],
+        date: detail.date,
+        startAt: detail.startAt,
+        endAt: detail.endAt,
+        totalDuration: detail.endAt.difference(detail.startAt),
+        subtotal: detail.subTotal,
+        discountAmount: detail.discount,
+        promoName: detail.promoName,
+        grandTotal: detail.totalBill,
+        paymentMethod: detail.paymentMethod,
+        cashierName: detail.createdBy,
+        isReprint: true,
       );
 
-      if (!mounted) return;
-      AppToast.success(context, "Struk ${transaction.invoiceNumber} berhasil dicetak ulang");
+      try {
+        await _receiptPrinter.printReceipt(receipt);
+        if (!mounted) return;
+        AppToast.success(
+          context,
+          "Struk ${transaction.invoiceNumber} berhasil dicetak ulang",
+        );
+      } on ReceiptPrinterNotFoundException {
+        if (!mounted) return;
+        await TicketPreviewDialog.show(
+          context,
+          title: "Preview Nota Billing",
+          children: TicketPreviewContent.billing(receipt),
+        );
+      }
     } on TransactionRepositoryException catch (e) {
       if (!mounted) return;
       AppToast.error(context, e.message);
@@ -342,15 +354,9 @@ class _TransactionPageState extends State<TransactionPage> {
   @override
   Widget build(BuildContext context) {
     final filtered = _filtered;
-    final pageCount = (filtered.length / _pageSize).ceil().clamp(
-      1,
-      1 << 30,
-    );
+    final pageCount = (filtered.length / _pageSize).ceil().clamp(1, 1 << 30);
     final page = _page.clamp(0, pageCount - 1);
-    final pageItems = filtered
-        .skip(page * _pageSize)
-        .take(_pageSize)
-        .toList();
+    final pageItems = filtered.skip(page * _pageSize).take(_pageSize).toList();
 
     return AppLayout(
       title: "Transaksi",
@@ -363,7 +369,9 @@ class _TransactionPageState extends State<TransactionPage> {
         children: [
           _buildTabBar(),
           const SizedBox(height: 16),
-          Expanded(child: _buildTabContent(filtered, pageItems, page, pageCount)),
+          Expanded(
+            child: _buildTabContent(filtered, pageItems, page, pageCount),
+          ),
         ],
       ),
     );
@@ -391,7 +399,11 @@ class _TransactionPageState extends State<TransactionPage> {
   Widget _buildTabBar() {
     return Row(
       children: [
-        _tabChip(_TransactionTab.billing, "Billing", Icons.receipt_long_outlined),
+        _tabChip(
+          _TransactionTab.billing,
+          "Billing",
+          Icons.receipt_long_outlined,
+        ),
         const SizedBox(width: 10),
         _tabChip(_TransactionTab.cafe, "Cafe", Icons.local_cafe_outlined),
       ],
@@ -491,11 +503,7 @@ class _TransactionPageState extends State<TransactionPage> {
         const SizedBox(width: 6),
         Text("s/d", style: AppText.caption),
         const SizedBox(width: 6),
-        _dateBox(
-          label: "Sampai Tanggal",
-          value: _endDate,
-          onTap: _pickEndDate,
-        ),
+        _dateBox(label: "Sampai Tanggal", value: _endDate, onTap: _pickEndDate),
         if (_startDate != null || _endDate != null) ...[
           const SizedBox(width: 8),
           InkWell(
@@ -586,8 +594,7 @@ class _TransactionPageState extends State<TransactionPage> {
                       onReprint: () => _reprintReceipt(pageItems[index]),
                       reprinting: _reprintingId == pageItems[index].id,
                       onEditPayment: () => _editPayment(pageItems[index]),
-                      editingPayment:
-                          _editingPaymentId == pageItems[index].id,
+                      editingPayment: _editingPaymentId == pageItems[index].id,
                       onCancel: () => _cancelTransaction(pageItems[index]),
                       canceling: _cancelingId == pageItems[index].id,
                     ),
@@ -866,10 +873,7 @@ class _TransactionRow extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 3,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: .15),
                   borderRadius: BorderRadius.circular(30),
@@ -905,10 +909,7 @@ class _TransactionRow extends StatelessWidget {
               ? Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _ReprintButton(
-                      reprinting: reprinting,
-                      onTap: onReprint,
-                    ),
+                    _ReprintButton(reprinting: reprinting, onTap: onReprint),
                     if (t.paymentMethod != "Potong Saldo") ...[
                       const SizedBox(width: 6),
                       _EditPaymentButton(
@@ -917,10 +918,7 @@ class _TransactionRow extends StatelessWidget {
                       ),
                     ],
                     const SizedBox(width: 6),
-                    _CancelButton(
-                      canceling: canceling,
-                      onTap: onCancel,
-                    ),
+                    _CancelButton(canceling: canceling, onTap: onCancel),
                   ],
                 )
               : const SizedBox.shrink(),

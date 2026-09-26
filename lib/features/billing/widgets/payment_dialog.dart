@@ -20,12 +20,17 @@ class PaymentResult {
   final int discountAmount;
   final int total;
 
+  /// The real `transaction_inv` returned by the backend after payment - see
+  /// [BillingRepository.submitPayment].
+  final String invoiceNumber;
+
   const PaymentResult({
     required this.paymentMethod,
     this.promo,
     required this.subtotal,
     required this.discountAmount,
     required this.total,
+    required this.invoiceNumber,
   });
 }
 
@@ -297,7 +302,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
       final paidBy = int.tryParse(session?['id']?.toString() ?? "") ?? 0;
       final now = DateTime.now();
 
-      await _billingRepository.submitPayment(
+      final invoiceNumber = await _billingRepository.submitPayment(
         tableId: widget.table.id,
         mode: widget.table.sessionType,
         startTime: startAt,
@@ -322,6 +327,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
           subtotal: calculation.totalBilling,
           discountAmount: calculation.totalPromo,
           total: calculation.totalTransaksi,
+          invoiceNumber: invoiceNumber,
         ),
       );
     } on BillingRepositoryException catch (e) {

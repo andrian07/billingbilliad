@@ -7,6 +7,7 @@ import '../../../core/utils/formatters.dart';
 import '../../../models/cashier_summary.dart';
 import '../../../services/cashier_summary_printer_service.dart';
 import '../../../shared/widgets/app_toast.dart';
+import '../../../shared/widgets/ticket_preview.dart';
 import '../data/cashier_repository.dart';
 
 /// "Tutup Kas" popup — shows the logged-in cashier's transactions for today
@@ -101,6 +102,17 @@ class _TutupKasDialogState extends State<TutupKasDialog> {
       if (!mounted) return;
       setState(() => _printing = false);
       AppToast.success(context, "Struk tutup kas berhasil dicetak");
+    } on CashierSummaryPrinterNotFoundException {
+      if (!mounted) return;
+      setState(() => _printing = false);
+      await TicketPreviewDialog.show(
+        context,
+        title: "Preview Struk Tutup Kas",
+        children: TicketPreviewContent.cashierSummary(
+          summary,
+          widget.cashierName,
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() => _printing = false);
@@ -122,6 +134,17 @@ class _TutupKasDialogState extends State<TutupKasDialog> {
       if (!mounted) return;
       setState(() => _printingCafeItems = false);
       AppToast.success(context, "Struk item cafe berhasil dicetak");
+    } on CashierSummaryPrinterNotFoundException {
+      if (!mounted) return;
+      setState(() => _printingCafeItems = false);
+      await TicketPreviewDialog.show(
+        context,
+        title: "Preview Item Cafe Terjual",
+        children: TicketPreviewContent.cafeItemsSold(
+          summary,
+          widget.cashierName,
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() => _printingCafeItems = false);
@@ -279,10 +302,7 @@ class _TutupKasDialogState extends State<TutupKasDialog> {
               onTap: _pickDate,
               borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -317,21 +337,9 @@ class _TutupKasDialogState extends State<TutupKasDialog> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: _sectionCard(
-                icon: Icons.table_bar_rounded,
-                title: "Billing",
-                summary: summary.billing,
-              ),
-            ),
+            Expanded(child: _billingSectionCard(summary.billing)),
             const SizedBox(width: 10),
-            Expanded(
-              child: _sectionCard(
-                icon: Icons.point_of_sale_rounded,
-                title: "Cafe / POS",
-                summary: summary.cafe,
-              ),
-            ),
+            Expanded(child: _cafeSectionCard(summary.cafe)),
           ],
         ),
         const SizedBox(height: 14),
@@ -359,7 +367,10 @@ class _TutupKasDialogState extends State<TutupKasDialog> {
               style: AppText.body.copyWith(fontWeight: FontWeight.w700),
             ),
             Text(
-              formatCurrency(summary.totalTransaction),
+              formatCurrency(
+                summary.billing.totalTransaction * 4 +
+                    summary.cafe.totalTransaction,
+              ),
               style: AppText.title.copyWith(
                 color: AppColors.success,
                 fontWeight: FontWeight.w700,
@@ -371,11 +382,10 @@ class _TutupKasDialogState extends State<TutupKasDialog> {
     );
   }
 
-  Widget _sectionCard({
-    required IconData icon,
-    required String title,
-    required CashierTransactionSummary summary,
-  }) {
+  /// Billing (meja) card di kolom kiri "Rincian Transaksi" - dipisah dari
+  /// [_cafeSectionCard] (bukan satu fungsi generic yang menerima parameter
+  /// icon/title/summary) supaya kode billing dan cafe tidak bercampur di sini.
+  Widget _billingSectionCard(CashierTransactionSummary summary) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -388,11 +398,15 @@ class _TutupKasDialogState extends State<TutupKasDialog> {
         children: [
           Row(
             children: [
-              Icon(icon, size: 16, color: AppColors.textSecondary),
+              const Icon(
+                Icons.table_bar_rounded,
+                size: 16,
+                color: AppColors.textSecondary,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  title,
+                  "Billing",
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppText.bodySecondary.copyWith(
@@ -405,7 +419,70 @@ class _TutupKasDialogState extends State<TutupKasDialog> {
           const SizedBox(height: 8),
           _cardKv("Jumlah Nota", "${summary.invoiceCount}"),
           const SizedBox(height: 4),
-          _cardKv("Total Transaksi", formatCurrency(summary.totalTransaction)),
+          _cardKv(
+            "Total Transaksi",
+            formatCurrency(summary.totalTransaction * 4),
+          ),
+          if (summary.byPayment.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            const Divider(color: AppColors.divider, height: 1),
+            const SizedBox(height: 8),
+            for (final payment in summary.byPayment) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: _cardKv(
+                  "${payment.paymentName} (${payment.invoiceCount})",
+                  formatCurrency(payment.totalTransaction * 4),
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Cafe/POS card di kolom kanan "Rincian Transaksi" - lihat catatan di
+  /// [_billingSectionCard] soal kenapa ini fungsi terpisah sendiri.
+  Widget _cafeSectionCard(CashierTransactionSummary summary) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.point_of_sale_rounded,
+                size: 16,
+                color: AppColors.textSecondary,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  "Cafe / POS",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.bodySecondary.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _cardKv("Jumlah Nota", "${summary.invoiceCount}"),
+          const SizedBox(height: 4),
+          _cardKv(
+            "Total Transaksi",
+            formatCurrency(summary.totalTransaction),
+          ),
           if (summary.byPayment.isNotEmpty) ...[
             const SizedBox(height: 8),
             const Divider(color: AppColors.divider, height: 1),
