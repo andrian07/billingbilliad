@@ -242,26 +242,20 @@ class TicketPreviewContent {
       if (receipt.periods.isNotEmpty) ...[
         TicketPreviewLayout.sectionTitle("Rincian Waktu"),
         for (final period in receipt.periods) ...[
-          TicketPreviewLayout.row(
-            period.label,
-            formatCurrency(period.cost * 4),
-          ),
+          TicketPreviewLayout.row(period.label, formatCurrency(period.cost)),
           TicketPreviewLayout.row("  Durasi", formatDuration(period.duration)),
         ],
       ],
       TicketPreviewLayout.separator(),
-      TicketPreviewLayout.row(
-        "Subtotal",
-        formatCurrency(receipt.subtotal * 4),
-      ),
+      TicketPreviewLayout.row("Subtotal", formatCurrency(receipt.subtotal)),
       if (receipt.promoName != null)
         TicketPreviewLayout.row("Promo", receipt.promoName!),
       if (receipt.discountAmount > 0)
         TicketPreviewLayout.row(
           "Diskon",
-          "-${formatCurrency(receipt.discountAmount * 4)}",
+          "-${formatCurrency(receipt.discountAmount)}",
         ),
-      TicketPreviewLayout.grandTotal("GRAND TOTAL", receipt.grandTotal * 4),
+      TicketPreviewLayout.grandTotal("GRAND TOTAL", receipt.grandTotal),
       TicketPreviewLayout.row("Bayar", receipt.paymentMethod),
       ...TicketPreviewLayout.footer(receipt.cashierName),
     ];
@@ -333,12 +327,12 @@ class TicketPreviewContent {
       TicketPreviewLayout.row("Jumlah Nota", "${summary.billing.invoiceCount}"),
       TicketPreviewLayout.row(
         "Total Transaksi",
-        formatCurrency(summary.billing.totalTransaction * 4),
+        formatCurrency(summary.billing.totalTransaction),
       ),
       for (final payment in summary.billing.byPayment)
         TicketPreviewLayout.row(
           "  ${payment.paymentName}",
-          "${formatCurrency(payment.totalTransaction * 4)} (${payment.invoiceCount})",
+          "${formatCurrency(payment.totalTransaction)} (${payment.invoiceCount})",
         ),
       TicketPreviewLayout.sectionTitle("Cafe / POS"),
       TicketPreviewLayout.row("Jumlah Nota", "${summary.cafe.invoiceCount}"),
@@ -355,7 +349,7 @@ class TicketPreviewContent {
       TicketPreviewLayout.row("Total Nota", "${summary.totalInvoiceCount}"),
       TicketPreviewLayout.grandTotal(
         "GRAND TOTAL",
-        summary.billing.totalTransaction * 4 + summary.cafe.totalTransaction,
+        summary.billing.totalTransaction + summary.cafe.totalTransaction,
       ),
     ];
   }

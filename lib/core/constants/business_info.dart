@@ -1,7 +1,7 @@
 class BusinessInfo {
   BusinessInfo._();
 
-  static const name = "Elluna Billiard";
-  static const address = "Jl. Jenderal Ahmad Yani";
+  static const name = "iPocket Billiard";
+  static const address = "Jl. HM. Rafi'i, Muderejo";
   static const outletCode = "1";
 }
