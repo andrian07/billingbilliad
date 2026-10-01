@@ -51,11 +51,30 @@ class TicketLayout {
   }
 
   /// A plain label/value row — never bold, see class doc.
+  ///
+  /// Built as a single manually space-padded line, NOT via [Ticket.row]'s
+  /// column positioning: that relies on an ESC $ absolute-position command
+  /// that some printers (including the one a real printed sample surfaced
+  /// this on) don't implement correctly — instead of just spacing, it
+  /// printed a garbage placeholder glyph where the jump should be. Plain
+  /// text has no such risk; every ESC/POS printer supports it identically.
   static void row(Ticket ticket, String label, String value) {
-    ticket.row([
-      PrintColumn(text: label, flex: 4),
-      PrintColumn(text: value, flex: 5, align: PrintAlign.right),
-    ]);
+    // 48 kolom = charsPerLine() bawaan paket ini untuk Font A di kertas 80mm
+    // (PaperSize.charsPerLine()) - dipakai supaya tetap konsisten dengan baris
+    // plain-text lain (mis. grandTotal) yang juga mengasumsikan lebar ini.
+    const lineWidth = 48;
+    final combinedLength = label.length + value.length;
+
+    if (combinedLength + 1 > lineWidth) {
+      // Tidak muat satu baris - taruh value di baris sendiri rata kanan,
+      // daripada dipotong atau bikin kolomnya meleset.
+      ticket.text(label);
+      ticket.text(value, align: PrintAlign.right);
+      return;
+    }
+
+    final padding = ' ' * (lineWidth - combinedLength);
+    ticket.text('$label$padding$value');
   }
 
   static void sectionTitle(Ticket ticket, String title) {
