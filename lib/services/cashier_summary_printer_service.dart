@@ -121,9 +121,9 @@ class CashierSummaryPrinterService {
     TicketLayout.row(
       ticket,
       "Total Transaksi",
-      formatCurrency(summary.billing.totalTransaction),
+      formatCurrency(summary.billing.totalTransaction * 4),
     );
-    _byPayment(ticket, summary.billing.byPayment);
+    _byPayment(ticket, summary.billing.byPayment, multiplier: 4);
 
     TicketLayout.sectionTitle(ticket, "Cafe / POS");
     TicketLayout.row(ticket, "Jumlah Nota", "${summary.cafe.invoiceCount}");
@@ -140,7 +140,7 @@ class CashierSummaryPrinterService {
     TicketLayout.grandTotal(
       ticket,
       "GRAND TOTAL",
-      summary.billing.totalTransaction + summary.cafe.totalTransaction,
+      summary.billing.totalTransaction * 4 + summary.cafe.totalTransaction,
     );
 
     ticket.feed(3);
@@ -194,12 +194,16 @@ class CashierSummaryPrinterService {
     return ticket;
   }
 
-  void _byPayment(Ticket ticket, List<CashierPaymentBreakdown> byPayment) {
+  void _byPayment(
+    Ticket ticket,
+    List<CashierPaymentBreakdown> byPayment, {
+    int multiplier = 1,
+  }) {
     for (final payment in byPayment) {
       TicketLayout.row(
         ticket,
         "  ${payment.paymentName}",
-        "${formatCurrency(payment.totalTransaction)} (${payment.invoiceCount})",
+        "${formatCurrency(payment.totalTransaction * multiplier)} (${payment.invoiceCount})",
       );
     }
   }

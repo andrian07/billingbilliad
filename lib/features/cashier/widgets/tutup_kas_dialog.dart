@@ -368,7 +368,7 @@ class _TutupKasDialogState extends State<TutupKasDialog> {
             ),
             Text(
               formatCurrency(
-                summary.billing.totalTransaction +
+                summary.billing.totalTransaction * 4 +
                     summary.cafe.totalTransaction,
               ),
               style: AppText.title.copyWith(
@@ -419,7 +419,10 @@ class _TutupKasDialogState extends State<TutupKasDialog> {
           const SizedBox(height: 8),
           _cardKv("Jumlah Nota", "${summary.invoiceCount}"),
           const SizedBox(height: 4),
-          _cardKv("Total Transaksi", formatCurrency(summary.totalTransaction)),
+          _cardKv(
+            "Total Transaksi",
+            formatCurrency(summary.totalTransaction * 4),
+          ),
           if (summary.byPayment.isNotEmpty) ...[
             const SizedBox(height: 8),
             const Divider(color: AppColors.divider, height: 1),
@@ -429,7 +432,7 @@ class _TutupKasDialogState extends State<TutupKasDialog> {
                 padding: const EdgeInsets.only(bottom: 4),
                 child: _cardKv(
                   "${payment.paymentName} (${payment.invoiceCount})",
-                  formatCurrency(payment.totalTransaction),
+                  formatCurrency(payment.totalTransaction * 4),
                   color: AppColors.textSecondary,
                 ),
               ),
