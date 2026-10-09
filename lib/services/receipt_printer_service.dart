@@ -124,13 +124,13 @@ class ReceiptPrinterService {
     if (receipt.periods.isNotEmpty) {
       TicketLayout.sectionTitle(ticket, "Rincian Waktu");
       for (final period in receipt.periods) {
-        TicketLayout.row(ticket, period.label, formatCurrency(period.cost * 4));
+        TicketLayout.row(ticket, period.label, formatCurrency(period.cost));
         TicketLayout.row(ticket, "  Durasi", formatDuration(period.duration));
       }
     }
 
     ticket.separator(char: '-', linesAfter: 1);
-    TicketLayout.row(ticket, "Subtotal", formatCurrency(receipt.subtotal * 4));
+    TicketLayout.row(ticket, "Subtotal", formatCurrency(receipt.subtotal));
     if (receipt.promoName != null) {
       TicketLayout.row(ticket, "Promo", receipt.promoName!);
     }
@@ -138,11 +138,11 @@ class ReceiptPrinterService {
       TicketLayout.row(
         ticket,
         "Diskon",
-        "-${formatCurrency(receipt.discountAmount * 4)}",
+        "-${formatCurrency(receipt.discountAmount)}",
       );
     }
 
-    TicketLayout.grandTotal(ticket, "GRAND TOTAL", receipt.grandTotal * 4);
+    TicketLayout.grandTotal(ticket, "GRAND TOTAL", receipt.grandTotal);
 
     TicketLayout.row(ticket, "Bayar", receipt.paymentMethod);
     TicketLayout.footer(ticket, receipt.cashierName);
