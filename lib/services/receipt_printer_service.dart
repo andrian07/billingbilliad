@@ -20,9 +20,8 @@ class ReceiptPrinterException implements Exception {
 }
 
 /// Thrown specifically when no USB printer is connected at all (as opposed
-/// to a printer being present but failing/timing out) — callers catch this
-/// separately to fall back to [TicketPreviewDialog] instead of just showing
-/// an error, since there's nothing actionable for the user to fix mid-flow.
+/// to a printer being present but failing/timing out) — callers show it
+/// as an error toast (no on-screen preview fallback).
 class ReceiptPrinterNotFoundException extends ReceiptPrinterException {
   const ReceiptPrinterNotFoundException()
     : super(

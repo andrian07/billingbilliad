@@ -7,7 +7,6 @@ import '../../../core/utils/formatters.dart';
 import '../../../models/cashier_summary.dart';
 import '../../../services/cashier_summary_printer_service.dart';
 import '../../../shared/widgets/app_toast.dart';
-import '../../../shared/widgets/ticket_preview.dart';
 import '../data/cashier_repository.dart';
 
 /// "Tutup Kas" popup — shows the logged-in cashier's transactions for today
@@ -102,17 +101,6 @@ class _TutupKasDialogState extends State<TutupKasDialog> {
       if (!mounted) return;
       setState(() => _printing = false);
       AppToast.success(context, "Struk tutup kas berhasil dicetak");
-    } on CashierSummaryPrinterNotFoundException {
-      if (!mounted) return;
-      setState(() => _printing = false);
-      await TicketPreviewDialog.show(
-        context,
-        title: "Preview Struk Tutup Kas",
-        children: TicketPreviewContent.cashierSummary(
-          summary,
-          widget.cashierName,
-        ),
-      );
     } catch (e) {
       if (!mounted) return;
       setState(() => _printing = false);
@@ -134,17 +122,6 @@ class _TutupKasDialogState extends State<TutupKasDialog> {
       if (!mounted) return;
       setState(() => _printingCafeItems = false);
       AppToast.success(context, "Struk item cafe berhasil dicetak");
-    } on CashierSummaryPrinterNotFoundException {
-      if (!mounted) return;
-      setState(() => _printingCafeItems = false);
-      await TicketPreviewDialog.show(
-        context,
-        title: "Preview Item Cafe Terjual",
-        children: TicketPreviewContent.cafeItemsSold(
-          summary,
-          widget.cashierName,
-        ),
-      );
     } catch (e) {
       if (!mounted) return;
       setState(() => _printingCafeItems = false);

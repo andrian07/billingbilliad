@@ -15,7 +15,6 @@ import '../../services/session_storage.dart';
 import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/app_layout.dart';
 import '../../shared/widgets/app_toast.dart';
-import '../../shared/widgets/ticket_preview.dart';
 import '../product/data/product_repository.dart';
 import 'data/cafe_invoice_repository.dart';
 import 'data/cafe_repository.dart';
@@ -295,13 +294,9 @@ class _PosPageState extends State<PosPage> {
       if (!mounted) return;
       try {
         await _receiptPrinter.printCafeReceipt(receipt);
-      } on ReceiptPrinterNotFoundException {
+      } on ReceiptPrinterNotFoundException catch (e) {
         if (!mounted) return;
-        await TicketPreviewDialog.show(
-          context,
-          title: "Preview Nota Cafe",
-          children: TicketPreviewContent.cafe(receipt),
-        );
+        AppToast.error(context, e.message);
       }
     } catch (e) {
       if (!mounted) return;

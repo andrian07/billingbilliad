@@ -13,7 +13,6 @@ import '../../../services/receipt_printer_service.dart';
 import '../../../services/session_storage.dart';
 import '../../../shared/widgets/app_toast.dart';
 import '../../../shared/widgets/pin_guard.dart';
-import '../../../shared/widgets/ticket_preview.dart';
 import '../data/transaction_repository.dart';
 import 'edit_payment_dialog.dart';
 
@@ -205,13 +204,9 @@ class CafeTransactionListState extends State<CafeTransactionList> {
           context,
           "Struk ${transaction.invoiceNumber} berhasil dicetak ulang",
         );
-      } on ReceiptPrinterNotFoundException {
+      } on ReceiptPrinterNotFoundException catch (e) {
         if (!mounted) return;
-        await TicketPreviewDialog.show(
-          context,
-          title: "Preview Nota Cafe",
-          children: TicketPreviewContent.cafe(receipt),
-        );
+        AppToast.error(context, e.message);
       }
     } on TransactionRepositoryException catch (e) {
       if (!mounted) return;

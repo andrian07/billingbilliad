@@ -17,9 +17,8 @@ class CashierSummaryPrinterException implements Exception {
   String toString() => message;
 }
 
-/// Thrown specifically when no USB printer is connected at all — see
-/// [ReceiptPrinterNotFoundException] for why callers catch this separately
-/// (to fall back to [TicketPreviewDialog] instead of an error toast).
+/// Thrown specifically when no USB printer is connected at all. Callers show
+/// it as an error toast (no on-screen preview fallback).
 class CashierSummaryPrinterNotFoundException
     extends CashierSummaryPrinterException {
   const CashierSummaryPrinterNotFoundException()

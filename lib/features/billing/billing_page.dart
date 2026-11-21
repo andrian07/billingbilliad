@@ -14,7 +14,6 @@ import '../../services/session_storage.dart';
 import '../../shared/widgets/app_layout.dart';
 import '../../shared/widgets/app_toast.dart';
 import '../../shared/widgets/pin_guard.dart';
-import '../../shared/widgets/ticket_preview.dart';
 import 'data/billing_repository.dart';
 import 'data/invoice_repository.dart';
 import 'data/table_repository.dart';
@@ -248,15 +247,6 @@ class _BillingPageState extends State<BillingPage> {
         cashierName: cashierName,
       );
       await _receiptPrinter.printReceipt(receipt);
-    } on ReceiptPrinterNotFoundException {
-      if (!mounted || receipt == null) return;
-      // Tidak ada printer USB terpasang - tampilkan preview isi nota
-      // sebagai gantinya supaya tetap bisa dicek tanpa hardware.
-      await TicketPreviewDialog.show(
-        context,
-        title: "Preview Nota Billing",
-        children: TicketPreviewContent.billing(receipt),
-      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(

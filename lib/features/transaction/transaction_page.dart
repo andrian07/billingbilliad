@@ -16,7 +16,6 @@ import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/app_layout.dart';
 import '../../shared/widgets/app_toast.dart';
 import '../../shared/widgets/pin_guard.dart';
-import '../../shared/widgets/ticket_preview.dart';
 import 'data/transaction_repository.dart';
 import 'widgets/cafe_transaction_list.dart';
 import 'widgets/edit_payment_dialog.dart';
@@ -137,13 +136,9 @@ class _TransactionPageState extends State<TransactionPage> {
           context,
           "Struk ${transaction.invoiceNumber} berhasil dicetak ulang",
         );
-      } on ReceiptPrinterNotFoundException {
+      } on ReceiptPrinterNotFoundException catch (e) {
         if (!mounted) return;
-        await TicketPreviewDialog.show(
-          context,
-          title: "Preview Nota Billing",
-          children: TicketPreviewContent.billing(receipt),
-        );
+        AppToast.error(context, e.message);
       }
     } on TransactionRepositoryException catch (e) {
       if (!mounted) return;
