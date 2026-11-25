@@ -92,7 +92,7 @@ class TableRepository {
 
     return PoolTable(
       id: json['table_id']?.toString() ?? "",
-      name: "Meja $number",
+      name: number,
       status: isRunning ? TableStatus.playing : TableStatus.ready,
       categoryMejaId: int.tryParse(json['table_category']?.toString() ?? ""),
       badge: mode,

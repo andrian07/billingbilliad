@@ -315,7 +315,7 @@ class _TableCategoryFormDialogState extends State<TableCategoryFormDialog> {
                 dense: true,
                 controlAffinity: ListTileControlAffinity.leading,
                 title: Text(
-                  "Meja ${table.number}",
+                  table.number,
                   style: AppText.body.copyWith(fontSize: 13),
                 ),
                 subtitle: table.categoryName != null

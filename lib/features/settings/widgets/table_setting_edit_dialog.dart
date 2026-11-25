@@ -266,7 +266,7 @@ class _TableSettingEditDialogState extends State<TableSettingEditDialog> {
                 style: AppText.title.copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 2),
-              Text("Meja ${widget.table.number}", style: AppText.caption),
+              Text(widget.table.number, style: AppText.caption),
             ],
           ),
         ),

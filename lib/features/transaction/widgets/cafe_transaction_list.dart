@@ -168,7 +168,7 @@ class CafeTransactionListState extends State<CafeTransactionList> {
         businessAddress: BusinessInfo.address,
         invoiceNumber: detail.invoiceNumber,
         date: detail.date,
-        table: detail.table != null ? "Meja ${detail.table}" : null,
+        table: detail.table != null ? "${detail.table}" : null,
         customerName: detail.customerName,
         items: [
           for (final item in detail.items)
@@ -642,7 +642,7 @@ class CafeTransactionListState extends State<CafeTransactionList> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "Meja ${transaction.table!.padLeft(2, '0')}",
+                    transaction.table!.padLeft(2, '0'),
                     style: cellStyle,
                   ),
                   if (transaction.tableCategory != null)

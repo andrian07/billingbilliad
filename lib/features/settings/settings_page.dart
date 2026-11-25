@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_sizes.dart';
+import '../../core/constants/business_info.dart';
 import '../../core/navigation/app_navigation.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text.dart';
@@ -143,10 +144,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _openPrinterSelectDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => const PrinterSelectDialog(),
-    );
+    showDialog(context: context, builder: (_) => const PrinterSelectDialog());
   }
 
   @override
@@ -473,13 +471,25 @@ class _DaySection extends StatelessWidget {
       children: [
         SizedBox(width: 96, child: Text("JAM", style: style)),
         Expanded(
-          child: Text("HARGA 1", textAlign: TextAlign.end, style: style),
+          child: Text(
+            BusinessInfo.priceTierLabels[0].toUpperCase(),
+            textAlign: TextAlign.end,
+            style: style,
+          ),
         ),
         Expanded(
-          child: Text("HARGA 2", textAlign: TextAlign.end, style: style),
+          child: Text(
+            BusinessInfo.priceTierLabels[1].toUpperCase(),
+            textAlign: TextAlign.end,
+            style: style,
+          ),
         ),
         Expanded(
-          child: Text("HARGA 3", textAlign: TextAlign.end, style: style),
+          child: Text(
+            BusinessInfo.priceTierLabels[2].toUpperCase(),
+            textAlign: TextAlign.end,
+            style: style,
+          ),
         ),
         const SizedBox(width: 44),
       ],

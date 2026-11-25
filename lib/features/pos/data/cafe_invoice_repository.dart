@@ -22,7 +22,7 @@ class CafeInvoiceRepository {
         businessAddress: BusinessInfo.address,
         invoiceNumber: _buildInvoiceNumber(now, payment.transactionCafeId),
         date: now,
-        table: payment.table != null ? "Meja ${payment.table}" : null,
+        table: payment.table != null ? "${payment.table}" : null,
         customerName: payment.customerName,
         items: [
           for (final item in items)

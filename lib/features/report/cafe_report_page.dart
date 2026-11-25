@@ -545,7 +545,7 @@ class _CafeReportRowWidget extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "Meja ${r.table.toString().padLeft(2, '0')}",
+                    r.table.toString().padLeft(2, '0'),
                     style: cellStyle,
                   ),
                   if (r.tableCategory != null)

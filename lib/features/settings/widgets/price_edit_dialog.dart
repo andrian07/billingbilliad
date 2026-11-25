@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_sizes.dart';
+import '../../../core/constants/business_info.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text.dart';
 import '../../../core/utils/formatters.dart';
@@ -94,7 +95,7 @@ class _PriceEditDialogState extends State<PriceEditDialog> {
                 const Divider(color: AppColors.divider, height: 1),
                 const SizedBox(height: 22),
 
-                _label("Harga 1"),
+                _label("Harga ${BusinessInfo.priceTierLabels[0]}"),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _controller,
@@ -112,7 +113,7 @@ class _PriceEditDialogState extends State<PriceEditDialog> {
                 ),
                 const SizedBox(height: 18),
 
-                _label("Harga 2"),
+                _label("Harga ${BusinessInfo.priceTierLabels[1]}"),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _controller2,
@@ -130,7 +131,7 @@ class _PriceEditDialogState extends State<PriceEditDialog> {
                 ),
                 const SizedBox(height: 18),
 
-                _label("Harga 3"),
+                _label("Harga ${BusinessInfo.priceTierLabels[2]}"),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _controller3,

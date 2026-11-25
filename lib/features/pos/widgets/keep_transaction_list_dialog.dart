@@ -321,7 +321,7 @@ class _KeepTransactionListDialogState extends State<KeepTransactionListDialog> {
     final busy =
         _loadingDetailId != null || _deletingId != null || _renamingId != null;
     final tableLabel = (transaction.table != null && transaction.table != 0)
-        ? "Meja ${transaction.table}"
+        ? "${transaction.table}"
         : "-";
 
     return InkWell(
