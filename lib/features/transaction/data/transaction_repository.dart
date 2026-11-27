@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 import '../../../models/cafe_transaction.dart';
@@ -271,10 +272,8 @@ class TransactionRepository {
       return data;
     } on TransactionRepositoryException {
       rethrow;
-    } on DioException catch (_) {
-      throw const TransactionRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+    } on DioException catch (e) {
+      throw TransactionRepositoryException(describeDioError(e));
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 import '../../../models/product_category.dart';
@@ -97,9 +98,7 @@ class CategoryRepository {
       if (responseData is Map && responseData['message'] != null) {
         throw CategoryRepositoryException(responseData['message'].toString());
       }
-      throw const CategoryRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw CategoryRepositoryException(describeDioError(e));
     }
   }
 }

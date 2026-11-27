@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import '../../../core/utils/api_error.dart';
 
 import 'package:dio/dio.dart';
 
@@ -193,9 +194,7 @@ class UserRepository {
       if (responseData is Map && responseData['message'] != null) {
         throw UserRepositoryException(responseData['message'].toString());
       }
-      throw const UserRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw UserRepositoryException(describeDioError(e));
     }
   }
 }

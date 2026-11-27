@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 import '../../../models/unit.dart';
@@ -93,9 +94,7 @@ class UnitRepository {
       if (responseData is Map && responseData['message'] != null) {
         throw UnitRepositoryException(responseData['message'].toString());
       }
-      throw const UnitRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw UnitRepositoryException(describeDioError(e));
     }
   }
 }

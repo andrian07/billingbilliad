@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 import '../../../models/cart_item.dart';
@@ -220,13 +221,7 @@ class CafeRepository {
     } on CafeRepositoryException {
       rethrow;
     } on DioException catch (e) {
-      final responseData = e.response?.data;
-      if (responseData is Map && responseData['message'] != null) {
-        throw CafeRepositoryException(responseData['message'].toString());
-      }
-      throw const CafeRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw CafeRepositoryException(describeDioError(e));
     }
   }
 }

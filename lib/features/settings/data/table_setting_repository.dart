@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 import '../../../models/table_setting.dart';
@@ -98,9 +99,7 @@ class TableSettingRepository {
           responseData['message'].toString(),
         );
       }
-      throw const TableSettingRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw TableSettingRepositoryException(describeDioError(e));
     }
   }
 }

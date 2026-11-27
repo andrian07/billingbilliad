@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 
@@ -65,9 +66,7 @@ class ChangePasswordRepository {
           responseData['result'].toString(),
         );
       }
-      throw const ChangePasswordRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw ChangePasswordRepositoryException(describeDioError(e));
     }
   }
 }

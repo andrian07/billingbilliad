@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 import '../../../models/pagination_info.dart';
@@ -136,9 +137,7 @@ class PromoRepository {
       if (responseData is Map && responseData['message'] != null) {
         throw PromoRepositoryException(responseData['message'].toString());
       }
-      throw const PromoRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw PromoRepositoryException(describeDioError(e));
     }
   }
 
@@ -178,9 +177,7 @@ class PromoRepository {
       if (responseData is Map && responseData['message'] != null) {
         throw PromoRepositoryException(responseData['message'].toString());
       }
-      throw const PromoRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw PromoRepositoryException(describeDioError(e));
     }
   }
 }

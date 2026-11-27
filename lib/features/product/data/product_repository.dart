@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 import '../../../models/product.dart';
@@ -180,8 +181,6 @@ class ProductRepository {
     if (responseData is Map && responseData['message'] != null) {
       return ProductRepositoryException(responseData['message'].toString());
     }
-    return const ProductRepositoryException(
-      "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-    );
+    return ProductRepositoryException(describeDioError(e));
   }
 }

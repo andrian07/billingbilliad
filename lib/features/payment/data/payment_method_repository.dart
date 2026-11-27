@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 import '../../../models/payment_method.dart';
@@ -78,9 +79,7 @@ class PaymentMethodRepository {
           responseData['message'].toString(),
         );
       }
-      throw const PaymentMethodRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw PaymentMethodRepositoryException(describeDioError(e));
     }
   }
 }

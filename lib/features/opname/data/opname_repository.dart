@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 import '../../../models/pagination_info.dart';
@@ -155,9 +156,7 @@ class OpnameRepository {
       if (responseData is Map && responseData['message'] != null) {
         throw OpnameRepositoryException(responseData['message'].toString());
       }
-      throw const OpnameRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw OpnameRepositoryException(describeDioError(e));
     }
   }
 }

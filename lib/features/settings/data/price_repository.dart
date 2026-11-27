@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 import '../../../models/price_setting.dart';
@@ -84,9 +85,7 @@ class PriceRepository {
       if (responseData is Map && responseData['message'] != null) {
         throw PriceRepositoryException(responseData['message'].toString());
       }
-      throw const PriceRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw PriceRepositoryException(describeDioError(e));
     }
   }
 }

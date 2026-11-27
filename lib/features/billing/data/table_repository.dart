@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 import '../../../core/utils/formatters.dart';
@@ -62,10 +63,8 @@ class TableRepository {
       return rows.map((json) => _tableFromJson(json, promos)).toList();
     } on TableRepositoryException {
       rethrow;
-    } on DioException catch (_) {
-      throw const TableRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+    } on DioException catch (e) {
+      throw TableRepositoryException(describeDioError(e));
     }
   }
 

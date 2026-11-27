@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 import '../../../models/pagination_info.dart';
@@ -132,9 +133,7 @@ class PromoCafeRepository {
           responseData['message'].toString(),
         );
       }
-      throw const PromoCafeRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw PromoCafeRepositoryException(describeDioError(e));
     }
   }
 
@@ -180,9 +179,7 @@ class PromoCafeRepository {
           responseData['message'].toString(),
         );
       }
-      throw const PromoCafeRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw PromoCafeRepositoryException(describeDioError(e));
     }
   }
 }

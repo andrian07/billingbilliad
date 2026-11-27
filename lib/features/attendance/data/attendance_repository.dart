@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 
@@ -90,9 +91,7 @@ class AttendanceRepository {
       if (responseData is Map && responseData['result'] != null) {
         throw AttendanceRepositoryException(responseData['result'].toString());
       }
-      throw const AttendanceRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw AttendanceRepositoryException(describeDioError(e));
     }
   }
 }

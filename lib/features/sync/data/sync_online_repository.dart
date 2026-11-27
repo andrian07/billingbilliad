@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 import '../../../models/sync_queue_item.dart';
@@ -120,9 +121,7 @@ class SyncOnlineRepository {
       if (responseData is Map && responseData['result'] != null) {
         throw SyncOnlineRepositoryException(responseData['result'].toString());
       }
-      throw const SyncOnlineRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw SyncOnlineRepositoryException(describeDioError(e));
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import '../../../core/utils/api_error.dart';
 
 import 'package:dio/dio.dart';
 
@@ -233,10 +234,8 @@ class ReportRepository {
       return ReportExportFile(filename: filename, bytes: bytes);
     } on ReportRepositoryException {
       rethrow;
-    } on DioException catch (_) {
-      throw const ReportRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+    } on DioException catch (e) {
+      throw ReportRepositoryException(describeDioError(e));
     }
   }
 
@@ -284,9 +283,7 @@ class ReportRepository {
       if (responseData is Map && responseData['message'] != null) {
         throw ReportRepositoryException(responseData['message'].toString());
       }
-      throw const ReportRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw ReportRepositoryException(describeDioError(e));
     }
   }
 }

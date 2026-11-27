@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../core/utils/api_error.dart';
 
 import '../core/constants/api_endpoints.dart';
 
@@ -62,9 +63,7 @@ class AuthService {
         );
       }
 
-      throw const AuthException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw AuthException(describeDioError(e));
     }
   }
 }

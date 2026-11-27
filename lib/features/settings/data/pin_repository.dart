@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 
@@ -103,9 +104,7 @@ class PinRepository {
       if (responseData is Map && responseData['result'] != null) {
         throw PinRepositoryException(responseData['result'].toString());
       }
-      throw const PinRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw PinRepositoryException(describeDioError(e));
     }
   }
 }

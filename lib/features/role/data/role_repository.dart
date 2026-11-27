@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 import '../../../models/access_menu.dart';
@@ -123,9 +124,7 @@ class RoleRepository {
       if (responseData is Map && responseData['message'] != null) {
         throw RoleRepositoryException(responseData['message'].toString());
       }
-      throw const RoleRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw RoleRepositoryException(describeDioError(e));
     }
   }
 }

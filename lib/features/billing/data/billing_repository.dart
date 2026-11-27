@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../core/utils/api_error.dart';
 
 import '../../../core/constants/api_endpoints.dart';
 import '../../../core/utils/formatters.dart';
@@ -228,9 +229,7 @@ class BillingRepository {
       if (responseData is Map && responseData['message'] != null) {
         throw BillingRepositoryException(responseData['message'].toString());
       }
-      throw const BillingRepositoryException(
-        "Tidak dapat terhubung ke server. Periksa koneksi Anda.",
-      );
+      throw BillingRepositoryException(describeDioError(e));
     }
   }
 }
