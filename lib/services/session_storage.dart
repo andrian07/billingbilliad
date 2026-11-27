@@ -48,9 +48,7 @@ class SessionStorage {
 
     final session = await getSession();
     final raw = session?['menuKeys'];
-    _menuKeysCache = raw is List
-        ? raw.map((e) => e.toString()).toSet()
-        : null;
+    _menuKeysCache = raw is List ? raw.map((e) => e.toString()).toSet() : null;
     _menuKeysCacheLoaded = true;
     return _menuKeysCache;
   }

@@ -28,11 +28,19 @@ class _PrinterSelectDialogState extends State<PrinterSelectDialog> {
   String? _error;
   List<UsbPrinterDevice> _printers = [];
   String? _selectedIdentifier;
+  int _paperWidth = PrinterPreferenceStorage.defaultPaperWidth;
 
   @override
   void initState() {
     super.initState();
+    _loadPaperWidth();
     _scan();
+  }
+
+  Future<void> _loadPaperWidth() async {
+    final width = await _storage.getPaperWidth();
+    if (!mounted) return;
+    setState(() => _paperWidth = width);
   }
 
   Future<void> _scan() async {
@@ -66,7 +74,12 @@ class _PrinterSelectDialogState extends State<PrinterSelectDialog> {
   }
 
   Future<void> _save() async {
-    await _storage.setSelectedPrinterIdentifier(_selectedIdentifier);
+    // printer cuma ditimpa kalau ada yang dipilih - supaya ukuran kertas tetap
+    // bisa diganti walau printer sedang tidak terhubung saat dialog dibuka
+    if (_selectedIdentifier != null) {
+      await _storage.setSelectedPrinterIdentifier(_selectedIdentifier);
+    }
+    await _storage.setPaperWidth(_paperWidth);
     if (!mounted) return;
     Navigator.of(context).pop();
   }
@@ -98,6 +111,10 @@ class _PrinterSelectDialogState extends State<PrinterSelectDialog> {
               constraints: const BoxConstraints(maxHeight: 360),
               child: _buildBody(),
             ),
+            const SizedBox(height: 16),
+            const Divider(color: AppColors.divider, height: 1),
+            const SizedBox(height: 16),
+            _buildPaperSize(),
             const SizedBox(height: 20),
             _buildActions(),
           ],
@@ -186,8 +203,7 @@ class _PrinterSelectDialogState extends State<PrinterSelectDialog> {
             RadioListTile<String>(
               value: printer.identifier,
               groupValue: _selectedIdentifier,
-              onChanged: (value) =>
-                  setState(() => _selectedIdentifier = value),
+              onChanged: (value) => setState(() => _selectedIdentifier = value),
               activeColor: AppColors.primary,
               contentPadding: EdgeInsets.zero,
               title: Text(printer.name, style: AppText.body),
@@ -195,6 +211,42 @@ class _PrinterSelectDialogState extends State<PrinterSelectDialog> {
             ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPaperSize() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Ukuran Kertas",
+          style: AppText.body.copyWith(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          width: double.infinity,
+          child: SegmentedButton<int>(
+            segments: [
+              for (final width in PrinterPreferenceStorage.supportedPaperWidths)
+                ButtonSegment<int>(value: width, label: Text("$width mm")),
+            ],
+            selected: {_paperWidth},
+            showSelectedIcon: false,
+            onSelectionChanged: (selection) =>
+                setState(() => _paperWidth = selection.first),
+            style: SegmentedButton.styleFrom(
+              selectedBackgroundColor: AppColors.primary,
+              selectedForegroundColor: Colors.white,
+              foregroundColor: AppColors.textSecondary,
+              side: const BorderSide(color: AppColors.border),
+              minimumSize: const Size(0, 44),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -219,7 +271,7 @@ class _PrinterSelectDialogState extends State<PrinterSelectDialog> {
         Expanded(
           flex: 2,
           child: ElevatedButton.icon(
-            onPressed: _selectedIdentifier == null ? null : _save,
+            onPressed: _scanning ? null : _save,
             icon: const Icon(Icons.save_outlined, size: 20),
             label: const Text("SIMPAN"),
             style: ElevatedButton.styleFrom(

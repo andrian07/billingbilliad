@@ -100,7 +100,7 @@ class ReceiptPrinterService {
   }
 
   Future<Ticket> _buildTicket(Receipt receipt) async {
-    final ticket = await Ticket.create(PaperSize.mm80);
+    final ticket = await TicketLayout.create();
 
     TicketLayout.header(
       ticket,
@@ -150,7 +150,7 @@ class ReceiptPrinterService {
   }
 
   Future<Ticket> _buildCafeTicket(CafeReceipt receipt) async {
-    final ticket = await Ticket.create(PaperSize.mm80);
+    final ticket = await TicketLayout.create();
 
     TicketLayout.header(
       ticket,
@@ -218,7 +218,7 @@ class ReceiptPrinterService {
     String? customerName,
     List<CartItem> items,
   ) async {
-    final ticket = await Ticket.create(PaperSize.mm80);
+    final ticket = await TicketLayout.create();
     final now = DateTime.now();
 
     ticket.text(

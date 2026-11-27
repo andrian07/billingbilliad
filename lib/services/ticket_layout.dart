@@ -1,6 +1,7 @@
 import 'package:unified_esc_pos_printer/unified_esc_pos_printer.dart';
 
 import '../core/utils/formatters.dart';
+import 'printer_preference_storage.dart';
 
 /// Shared layout pieces for every printed receipt (table billing, cafe/POS,
 /// tutup kas) so they read as one consistent design instead of three
@@ -15,6 +16,21 @@ import '../core/utils/formatters.dart';
 /// is safe.
 class TicketLayout {
   TicketLayout._();
+
+  /// Characters per line for each ticket made by [create] — Font A width of
+  /// its paper (32 on 58mm, 48 on 80mm). [Ticket] doesn't expose its paper
+  /// size, so it's remembered here for [row]'s manual padding.
+  static final _lineWidths = Expando<int>('ticketLineWidth');
+
+  /// Creates a ticket at the paper width chosen in the printer settings
+  /// (58mm / 80mm, see [PrinterPreferenceStorage]). Every printed receipt
+  /// must be created through this so [row] pads to the right width.
+  static Future<Ticket> create() async {
+    final paperSize = await PrinterPreferenceStorage().getPaperSize();
+    final ticket = await Ticket.create(paperSize);
+    _lineWidths[ticket] = paperSize.charsPerLine(null);
+    return ticket;
+  }
 
   static void header(
     Ticket ticket, {
@@ -59,10 +75,11 @@ class TicketLayout {
   /// printed a garbage placeholder glyph where the jump should be. Plain
   /// text has no such risk; every ESC/POS printer supports it identically.
   static void row(Ticket ticket, String label, String value) {
-    // 48 kolom = charsPerLine() bawaan paket ini untuk Font A di kertas 80mm
-    // (PaperSize.charsPerLine()) - dipakai supaya tetap konsisten dengan baris
-    // plain-text lain (mis. grandTotal) yang juga mengasumsikan lebar ini.
-    const lineWidth = 48;
+    // charsPerLine() bawaan paket ini untuk Font A sesuai kertas yang dipilih
+    // (32 kolom di 58mm, 48 kolom di 80mm) - sama dengan lebar yang dipakai
+    // separator() paket ini, jadi barisnya tetap sejajar. 48 kalau ticket
+    // tidak dibuat lewat create().
+    final lineWidth = _lineWidths[ticket] ?? 48;
     final combinedLength = label.length + value.length;
 
     if (combinedLength + 1 > lineWidth) {

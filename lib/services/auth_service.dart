@@ -40,9 +40,7 @@ class AuthService {
 
       if (data["code"].toString() != "200") {
         final result = data["result"];
-        final message = result is String
-            ? result
-            : data["message"]?.toString();
+        final message = result is String ? result : data["message"]?.toString();
         throw AuthException(message ?? "Login gagal.");
       }
 

@@ -96,7 +96,7 @@ class CashierSummaryPrinterService {
     CashierClosingSummary summary,
     String cashierName,
   ) async {
-    final ticket = await Ticket.create(PaperSize.mm80);
+    final ticket = await TicketLayout.create();
 
     final now = DateTime.now();
 
@@ -152,7 +152,7 @@ class CashierSummaryPrinterService {
     CashierClosingSummary summary,
     String cashierName,
   ) async {
-    final ticket = await Ticket.create(PaperSize.mm80);
+    final ticket = await TicketLayout.create();
 
     final now = DateTime.now();
 
